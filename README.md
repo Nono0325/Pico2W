@@ -1,5 +1,7 @@
 # Raspberry Pi Pico 2 W - 物聯網核心實戰課程指南
 
+> 🌐 **線上互動教材網頁**：[https://nono0325.github.io/Pico2W/](https://nono0325.github.io/Pico2W/)（免安裝，手機與電腦瀏覽器隨開即學）
+
 本專案專為 **Raspberry Pi Pico 2 W (RP2350 + CYW43439)** 打造，精選兩大現代物聯網核心實務課程與實驗：
 1. **課程與實驗 1：MQTT 物聯網雙向雲端通訊 (使用台灣在地 [MQTTGO.io](https://mqttgo.io/) 平台)**
 2. **課程與實驗 2：台灣政府開放資料 (data.gov.tw) API 串接與智慧燈號警報**
