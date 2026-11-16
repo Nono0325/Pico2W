@@ -29,8 +29,12 @@ DEVICE_ID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 MQTT_BROKER = "mqttgo.io"  # 台灣在地開源免費 MQTT Broker
 MQTT_PORT = 1883           # 標準 MQTT TCP 連接埠
 
-TOPIC_PUB_TEMP = f"pico2w/{DEVICE_ID}/temp"  # Pico 定期發布溫度的主題
-TOPIC_SUB_LED  = f"pico2w/{DEVICE_ID}/led"   # Pico 訂閱接收控制指令的主題
+TOPIC_PUB_TEMP  = f"pico2w/{DEVICE_ID}/temp"   # Pico 定期發布溫度的主題
+TOPIC_SUB_LED   = f"pico2w/{DEVICE_ID}/led"    # Pico 訂閱接收控制指令的主題
+TOPIC_PUB_ALERT = f"pico2w/{DEVICE_ID}/alert"  # [實作挑戰] 過熱警報發布主題
+
+# [實作挑戰 1] 發布週期 (秒)：可改為 1 或 2，體驗 MQTT 輕量高頻即時推播
+PUB_INTERVAL = 5
 
 def read_temperature():
     """讀取 RP2350 內部溫度感測器 (攝氏 °C)"""
@@ -75,8 +79,16 @@ def on_message_received(topic, msg):
     elif msg_str == "toggle":
         led.toggle()
         print("🔄 板載 LED 狀態已切換")
+    elif msg_str == "blink":
+        # [實作擴充] 連續快閃 3 次
+        print("⚡ [實作指令] 板載 LED 連續快閃 3 次！")
+        for _ in range(3):
+            led.on()
+            time.sleep(0.15)
+            led.off()
+            time.sleep(0.15)
     else:
-        print(f"❓ 未知指令: {msg_str} (支援指令: on, off, toggle)")
+        print(f"❓ 未知指令: {msg_str} (支援指令: on, off, toggle, blink)")
 
 def main():
     print("=" * 65)
@@ -109,10 +121,10 @@ def main():
         print("   （⚠️ 提醒：請勿開啟 192.168.x.x，本實驗需在 MQTTGO 網頁上操作）")
         print("1. 接收溫度數據：")
         print(f"   在「訂閱主題」欄位貼上： {TOPIC_PUB_TEMP}")
-        print("   點擊「訂閱」，每 5 秒即可看見 Pico 回傳之即時溫度！")
+        print(f"   點擊「訂閱」，每 {PUB_INTERVAL} 秒即可看見 Pico 回傳之即時溫度！")
         print("2. 遠端控制 LED 燈：")
         print(f"   在「發布主題」欄位貼上： {TOPIC_SUB_LED}")
-        print("   在「發布訊息」填入： on 、 off 或 toggle，點擊「發布」！")
+        print("   在「發布訊息」填入： on 、 off 、 toggle 或 blink，點擊「發布」！")
         print("=" * 65 + "\n")
         
         last_pub_time = 0
@@ -120,13 +132,22 @@ def main():
             # 非阻塞檢查是否有來自雲端的訂閱訊息
             client.check_msg()
             
-            # 每 5 秒發布一次當前板載溫度
+            # 定期發布一次當前板載溫度
             now = time.time()
-            if now - last_pub_time >= 5:
+            if now - last_pub_time >= PUB_INTERVAL:
                 temp = read_temperature()
                 temp_msg = f"{temp:.2f}"
                 client.publish(TOPIC_PUB_TEMP, temp_msg)
                 print(f"📤 [MQTT 發布] 溫度: {temp_msg} °C -> 主題: {TOPIC_PUB_TEMP}")
+                
+                # ----------------------------------------------------
+                # [實作挑戰 3：過熱警報器] 若晶片溫度 > 30°C 觸發警報
+                # 請取消以下 4 行註解即可體驗邊緣智慧閉環實作：
+                # if temp > 30.0:
+                #     client.publish(TOPIC_PUB_ALERT, f"WARNING: Temp {temp:.2f}C exceeded limit!")
+                #     led.on(); time.sleep(0.08); led.off()
+                # ----------------------------------------------------
+                
                 last_pub_time = now
                 
             time.sleep(0.1)
