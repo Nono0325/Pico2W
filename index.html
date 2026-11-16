@@ -677,6 +677,7 @@
                 <li><a href="#intro" class="active">📌 課程簡介與硬體準備</a></li>
                 <li><a href="#wifi-setup">📶 Wi-Fi 快速設定指南</a></li>
                 <li><a href="#mqtt-theory">📘 【理論】MQTT 協議原理與架構</a></li>
+                <li><a href="#mqtt-1hr-plan">⏱️ 【教案】MQTT 1小時課堂規劃</a></li>
                 <li><a href="#lab1-mqtt">📡 【實作】實驗 1：MQTTGO 雙向通訊</a></li>
                 <li><a href="#lab1-tester">🎮 虛擬 Pico 2 W 互動模擬器</a></li>
                 <li><a href="#opendata-theory">📘 【理論】政府開放資料與 REST API</a></li>
@@ -921,6 +922,255 @@ WIFI_PASSWORD = <span class="c-str">"您的Wi-Fi密碼"</span></pre>
                             <li><strong>雙軌連接埠支援</strong>：
                                 <br>• <strong>TCP 1883</strong>：微控制器（Pico 2 W）標準 Socket 直連。
                                 <br>• <strong>WebSocket 8000</strong>：電腦與手機瀏覽器免安裝任何軟體直接收發。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 教案規劃：MQTT 1 小時極速上手實戰教案 -->
+            <section class="module-section" id="mqtt-1hr-plan">
+                <div class="section-header">
+                    <span class="section-icon">⏱️</span>
+                    <h2 class="section-title">【教案規劃】Pico 2 W ✕ MQTTGO.io：1 小時極速上手實戰教案</h2>
+                </div>
+                <p class="section-desc">
+                    專為 60 分鐘課堂/工作坊設計。<strong>零外接感測器、零門檻免註冊帳號、單一 Python 腳本即跑</strong>，從架構觀念、溫度發布、LED 遠端雙向反饋到跨組互控遊戲，60 分鐘內讓每位學生完整體建物聯網雙向雲端通訊！
+                </p>
+
+                <div class="callout-box" style="margin-top: 10px; margin-bottom: 24px;">
+                    <strong>🎯 教學特點</strong>：本教案使用 <strong>RP2350 內部溫度感測器 (ADC 4)</strong> 與 <strong>板載綠色 LED</strong>，完全不需麵包板與外接零件，杜絕接線接觸不良；搭配台灣在地免註冊平台 <strong><a href="https://mqttgo.io/" target="_blank" style="color: var(--primary);">MQTTGO.io</a></strong>，學生用手機或電腦網頁直接收發！完整教學手冊亦可參閱專案根目錄的 <a href="LESSON_PLAN_MQTT_1HR.md" target="_blank" style="color: var(--primary);"><code>LESSON_PLAN_MQTT_1HR.md</code></a>。
+                </div>
+
+                <!-- 課程基本資訊與硬體軟體規格 -->
+                <div class="cards-grid" style="margin-bottom: 24px;">
+                    <div class="card">
+                        <h3>📋 課程基本資訊</h3>
+                        <ul class="card-list">
+                            <li><strong>建議時長</strong>：整整 60 分鐘（高密度、動手即時回饋）</li>
+                            <li><strong>適合對象</strong>：高中職、大專院校資訊/電機、自造者社團、微控制器初學者</li>
+                            <li><strong>前置知識</strong>：具備基礎 Python 語法概念（變數、迴圈、函式）</li>
+                            <li><strong>硬體規格</strong>：每人/組 1 片 Raspberry Pi Pico 2 W + 傳輸線 + 具備 Wi-Fi 與瀏覽器的電腦</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>🛠️ 軟體與雲端環境</h3>
+                        <ul class="card-list">
+                            <li><strong>開發環境</strong>：<a href="https://thonny.org/" target="_blank" style="color: var(--primary);">Thonny IDE</a> + 官方 MicroPython 固件</li>
+                            <li><strong>雲端平台</strong>：<a href="https://mqttgo.io/" target="_blank" style="color: var(--primary);">MQTTGO.io</a>（台灣在地免註冊公開 Broker）</li>
+                            <li><strong>使用教材</strong>：<a href="#lab1-mqtt" style="color: var(--primary);"><code>lab1_mqttgo_iot.py</code></a>（單一整合程式碼）</li>
+                            <li><strong>零軟體依賴</strong>：學生端<strong>免安裝任何 MQTT Client 軟體</strong>，直接開瀏覽器操作</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 三維教學目標表格 -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>🎯 三維教學目標 (Rubric Goals)</h3>
+                    <div class="data-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 180px;">學習維度</th>
+                                    <th>具體學習目標與達成指標</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge badge-cyan">知識認知 (Knowledge)</span></td>
+                                    <td>
+                                        1. 能清楚說出 HTTP 與 MQTT 的核心差異（輪詢 vs. 推播、封包報頭 2 Bytes 極致開銷）。<br>
+                                        2. 理解 Pub/Sub 模型的三本柱（發布者、代理人、訂閱者）與空間/時間/同步三重解耦概念。
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-green">技能操作 (Skills)</span></td>
+                                    <td>
+                                        1. 能在 Thonny 中設定 Wi-Fi 並使用 <code>umqtt.simple</code> 成功連線 MQTTGO.io Broker。<br>
+                                        2. 實作以 5 秒為週期將 RP2350 內部溫度遙測發布 (Publish) 至雲端主題。<br>
+                                        3. 實作訂閱 (Subscribe) 回呼函式 (Callback)，非阻塞接收指令切換板載 LED。
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-purple">實務素養 (Attitude)</span></td>
+                                    <td>
+                                        1. 建立裝置唯一 ID (<code>machine.unique_id()</code>) 的物聯網防撞名命名思維。<br>
+                                        2. 建立正確的「客戶端角色認知」（理解為什麼不能在瀏覽器開啟 Pico 的 192.168.x.x IP）。
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 60 分鐘課堂時程規劃 -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>🕒 60 分鐘課堂時間軸與節奏掌控 (Minute-by-Minute)</h3>
+                    <div class="step-list">
+                        <!-- 階段 1 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(56, 189, 248, 0.2); border-color: var(--primary);">01</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #38bdf8;">【00 - 10 min】觀念破冰：為什麼物聯網首選 MQTT？</h4>
+                                    <span class="badge badge-cyan">10 分鐘 講述引導</span>
+                                </div>
+                                <p><strong>講師引導要點</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li><strong>提問互動</strong>：「如果想用手機即時知道家裡客廳現在幾度，用網頁 HTTP 會怎麼做？」引出輪詢 (Polling) 每次重建 TCP 握手與 Header 動輒數百 Bytes 耗電耗頻寬的痛點。</li>
+                                    <li><strong>MQTT 登場</strong>：介紹 IBM 1999 年專為衛星石油管線設計的輕量協議，固定報頭僅需 <strong>2 Bytes</strong>，維持長連線靜默推播（延遲 &lt;15ms）。</li>
+                                    <li><strong>Pub/Sub 報社比喻</strong>：發布者（Pico）投稿、Broker（MQTTGO）中繼、訂閱者（手機網頁）訂閱，雙方互不相識卻能精準傳遞。</li>
+                                    <li><strong>認識 MQTTGO.io</strong>：台灣在地伺服器，超低延遲，免註冊免帳密，支援 WebSocket 8000 網頁端即時收發。</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 階段 2 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(16, 185, 129, 0.2); border-color: #34d399;">02</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #34d399;">【10 - 20 min】環境就緒：Wi-Fi 連線與硬體唯一識別</h4>
+                                    <span class="badge badge-green">10 分鐘 實機動手</span>
+                                </div>
+                                <p><strong>操作指引與檢核</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li>在 Thonny 開啟 <code>lab1_mqttgo_iot.py</code>，填入教室 2.4GHz Wi-Fi 帳密。</li>
+                                    <li><strong>物聯網核心概念剖析</strong>：<code>DEVICE_ID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')</code>。解釋為何不能寫死固定的 <code>client_id = "pico"</code>，透過硬體晶片序號生成唯一 ID，全班 40 人在同一 Broker 上絕不衝突！</li>
+                                    <li>按下 <strong>F5</strong> 執行，觀察 Thonny Shell 輸出專屬 Client ID 與連線成功提示：
+                                        <br><code>✅ MQTT Broker 連線成功！ 📡 已訂閱: pico2w/&lt;DEVICE_ID&gt;/led</code></li>
+                                    <li><strong>通關檢核</strong>：全班學生的 Shell 均印出連線成功提示。</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 階段 3 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(56, 189, 248, 0.2); border-color: var(--primary);">03</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #38bdf8;">【20 - 35 min】實戰任務 1：邊緣到雲端 (溫度遙測發布與感測實證)</h4>
+                                    <span class="badge badge-cyan">15 分鐘 物理實驗</span>
+                                </div>
+                                <p><strong>操作指引與驗證</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li>學生在電腦或手機瀏覽器開啟 <code>https://mqttgo.io/</code>。</li>
+                                    <li>複製 Thonny Shell 輸出的溫度主題（如 <code>pico2w/e6614103e72c8328/temp</code>），貼入 MQTTGO.io 網頁「訂閱主題」並點擊「訂閱」。</li>
+                                    <li><strong>驗證感測</strong>：觀察網頁每 5 秒即時跳出小數點後兩位的當前溫度數據。</li>
+                                    <li><strong>物理體驗互動</strong>：請學生<strong>用食指按住 Pico 2 W 上的 RP2350 黑色主晶片 10 秒鐘</strong>，觀察網頁溫度數值迅速從 28°C 攀升至 33°C 以上！確認實體世界的物理變化即時傳達到雲端！</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 階段 4 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(168, 85, 247, 0.2); border-color: #c084fc;">04</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #c084fc;">【35 - 50 min】實戰任務 2：雲端到邊緣 (指令接收與板載 LED 雙向遙控)</h4>
+                                    <span class="badge badge-purple">15 分鐘 雙向控制</span>
+                                </div>
+                                <p><strong>操作指引與程式碼剖析</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li>回到 <code>https://mqttgo.io/</code> 網頁，在「發布主題」填入自己的 LED 控制主題（如 <code>pico2w/e6614103e72c8328/led</code>）。</li>
+                                    <li>在「發布訊息」輸入指令並發送：
+                                        <br>• 輸入 <code>on</code> ➔ Pico 板載綠色 LED <strong>瞬間亮起</strong>！
+                                        <br>• 輸入 <code>off</code> ➔ 板載 LED <strong>瞬間熄滅</strong>！
+                                        <br>• 輸入 <code>toggle</code> ➔ 板載 LED <strong>即時狀態反轉</strong>！
+                                    </li>
+                                    <li><strong>回呼機制核心解構</strong>：剖析 <code>client.set_callback(on_message_received)</code> 與主迴圈中 <code>client.check_msg()</code> 的非阻塞輪詢，解釋如何在回報溫度的同時不漏接雲端遙控指令。</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 階段 5 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(234, 179, 8, 0.2); border-color: #eab308;">05</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #facc15;">【50 - 55 min】課堂高潮：跨組互控大挑戰與萬用字元全班大看板</h4>
+                                    <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">5 分鐘 互動遊戲</span>
+                                </div>
+                                <p><strong>高潮互動設計</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li><strong>玩法 1：交換主題互控</strong>：左右兩位同學互相交換自己的 <code>led</code> 主題，同學 A 用自己的手機幫同學 B 點燈，體驗跨設備雙向雲端互聯的成就感！</li>
+                                    <li><strong>玩法 2：全班廣播大看板（講師大螢幕示範）</strong>：
+                                        <br>講師在教室大投影幕開啟 MQTTGO.io，訂閱萬用字元主題：<code>pico2w/+/temp</code>。
+                                        <br>單層萬用字元 <code>+</code> 發威：全班 40 位同學的即時晶片溫度同時湧入大螢幕，現場比拚誰的手指能讓晶片溫度飆得最高！
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 階段 6 -->
+                        <div class="step-item">
+                            <div class="step-num" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444;">06</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #f87171;">【55 - 60 min】總結收尾：防呆提醒（為什麼拒絕連線？）與課後延伸</h4>
+                                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4);">5 分鐘 觀念釐清</span>
+                                </div>
+                                <p><strong>關鍵誤區與課後思考</strong>：</p>
+                                <ul class="card-list" style="margin-top: 6px;">
+                                    <li>⚠️ <strong>學生最常犯的重大誤區</strong>：「為什麼我在瀏覽器輸入 Pico 的 IP <code>192.168.x.x</code> 會顯示 <code>ERR_CONNECTION_REFUSED</code>（拒絕連線）？」
+                                        <br>➔ <strong>重申觀念</strong>：Pico 是 MQTT 客戶端（主動連線雲端），內部沒有架設 Web Server，所有網頁操作請永遠在 <code>https://mqttgo.io/</code> 進行！</li>
+                                    <li><strong>課後思考</strong>：為什麼溫度遙測適合 QoS 0，開門指令需要 QoS 1？如何利用 Retain 機制讓手機一開網頁就掌握最新燈號？</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 學生實作評量檢核清單 (Rubric) 與 SOP -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>📋 學生實作評量檢核清單 (Rubric)</h3>
+                        <div class="data-table-container" style="margin: 10px 0 0 0;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>評量項目</th>
+                                        <th>檢核指標</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Wi-Fi &amp; 連線</strong></td>
+                                        <td>Shell 印出本機 IP、專屬 Client ID 與 Broker 連線成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>溫度遙測</strong></td>
+                                        <td>在 MQTTGO.io 網頁看見自己的溫度每 5 秒穩定跳動</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>晶片升溫實證</strong></td>
+                                        <td>手指按壓 RP2350 晶片後，網頁數值明確攀升</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>指令遙控</strong></td>
+                                        <td>從網頁發布 <code>on</code>/<code>off</code> 能精準切換板載實體綠色 LED</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>概念與互控</strong></td>
+                                        <td>能解釋為何不可開 192.168.x.x，並能完成跨組互控</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚨 現場突發狀況快速救急 SOP</h3>
+                        <ul class="card-list">
+                            <li><strong>Wi-Fi 一直印點點點逾時</strong>：
+                                <br>90% 原因為連至 5GHz Wi-Fi 或校園網頁認證網路。請同學改連<strong>手機熱點</strong>，並於熱點設定開啟「最大相容性 (2.4GHz)」。
+                            </li>
+                            <li><strong>連上 Wi-Fi 但卡在連線 Broker</strong>：
+                                <br>學校對外防火牆阻擋了 TCP Port 1883。切換為手機 4G/5G 熱點即可暢通無阻。
+                            </li>
+                            <li><strong>網頁發送指令 Pico 卻沒反應</strong>：
+                                <br>1. 檢查發布主題是否與 Pico 印出的完全一致（大小寫需完全相符）。
+                                <br>2. 檢查 Thonny 是否誤按了紅色 Stop 按鈕導致程式停止。
                             </li>
                         </ul>
                     </div>
