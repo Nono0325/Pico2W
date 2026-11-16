@@ -1,0 +1,136 @@
+# lab1_sender.py - Pico 2 W 專屬傳送端 (MQTT Publisher)
+# 適用硬體：Raspberry Pi Pico 2 W (RP2350 + CYW43439)
+# 零外接零件：使用 RP2350 內部溫度感測器 (ADC 4) 與板載 LED ("LED")
+# 運作說明：本程式作為「發送端」，每 3 秒將晶片溫度與傳輸序號發布至雲端 Broker。
+#           另一塊執行 lab1_receiver.py 的 Pico 2 W (或 MQTTGO 網頁) 即可即時接收！
+
+import time
+import network
+import machine
+from machine import Pin, ADC
+import ubinascii
+import ujson
+from umqtt.simple import MQTTClient
+
+# ==========================================
+# 1. Wi-Fi 連線設定 (請填入您的 2.4GHz Wi-Fi)
+# ==========================================
+WIFI_SSID = "YOUR_WIFI_SSID"          # 請替換為您的 Wi-Fi 名稱 (僅支援 2.4GHz)
+WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"  # 請替換為您的 Wi-Fi 密碼
+
+# ==========================================
+# 2. 硬體引腳與感測器初始化
+# ==========================================
+led = Pin("LED", Pin.OUT)       # 板載綠色 LED (發送時閃爍反饋)
+temp_sensor = ADC(4)            # RP2350 內部溫度感測器通道
+
+# ==========================================
+# 3. MQTT 配對頻道與伺服器設定
+# ==========================================
+MQTT_BROKER = "mqttgo.io"       # 台灣在地開源免費 MQTT Broker
+MQTT_PORT = 1883                # 標準 MQTT TCP 連接埠
+
+# 取得硬體唯一 ID 作為發送端身分辨識
+DEVICE_ID = ubinascii.hexlify(machine.unique_id()).decode('utf-8')
+CLIENT_ID = f"pico2w_sender_{DEVICE_ID[:6]}"
+
+# 📡 【核心配對主題】：傳送端發布、接收端訂閱必須使用相同主題！
+# 課堂分組提示：可將 "pair" 改為組別，例如 "pico2w/team1/data"
+PAIR_TOPIC = "pico2w/pair/data"
+
+# 發送週期 (秒)
+SEND_INTERVAL = 3
+
+def read_temperature():
+    """讀取 RP2350 內部溫度感測器 (攝氏 °C)"""
+    conversion_factor = 3.3 / 65535
+    reading = temp_sensor.read_u16() * conversion_factor
+    # RP2350 內部溫度計算公式：27 - (Vbe - 0.706) / 0.001721
+    return 27 - (reading - 0.706) / 0.001721
+
+def blink_led(times=1, duration=0.08):
+    """板載 LED 快速閃爍，提供實體物理發送反饋"""
+    for _ in range(times):
+        led.on()
+        time.sleep(duration)
+        led.off()
+        time.sleep(duration)
+
+def connect_wifi():
+    """連線至 Wi-Fi 基地台"""
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    if not wlan.isconnected():
+        print(f"📡 [傳送端] 正在連線至 Wi-Fi: {WIFI_SSID} ...")
+        wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+        timeout = 20
+        while not wlan.isconnected() and timeout > 0:
+            time.sleep(0.5)
+            timeout -= 1
+            print(".", end="")
+    if wlan.isconnected():
+        ip = wlan.ifconfig()[0]
+        print(f"\n✅ [傳送端] Wi-Fi 連線成功！本機 IP: {ip}")
+        return True
+    else:
+        print("\n❌ [錯誤] Wi-Fi 連線逾時，請確認帳密與 2.4GHz 頻段！")
+        return False
+
+def main():
+    print("=" * 60)
+    print("📤 Pico 2 W 專屬傳送端 (MQTT Publisher)")
+    print(f"🆔 裝置識別: {CLIENT_ID}")
+    print(f"📡 配對發送主題: {PAIR_TOPIC}")
+    print("=" * 60)
+
+    if not connect_wifi():
+        return
+
+    print(f"\n正在連線至 MQTT Broker ({MQTT_BROKER}:{MQTT_PORT}) ...")
+    client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, keepalive=60)
+
+    try:
+        client.connect()
+        print("✅ MQTT Broker 連線成功！")
+        print(f"🚀 開始定期發送數據至: {PAIR_TOPIC} (每 {SEND_INTERVAL} 秒一筆)\n")
+        print("-" * 60)
+
+        seq = 0
+        while True:
+            seq += 1
+            temp = read_temperature()
+
+            # 封裝為標準 JSON 格式封包
+            payload = {
+                "seq": seq,
+                "sender": CLIENT_ID,
+                "temp": round(temp, 2),
+                "status": "HOT" if temp > 30.0 else "NORMAL"
+            }
+            msg_str = ujson.dumps(payload)
+
+            # 發布至 MQTT 主題
+            client.publish(PAIR_TOPIC, msg_str)
+
+            # 實體物理反饋：板載綠色 LED 快閃一下
+            blink_led(1, 0.1)
+
+            print(f"📤 [已送出 #{seq:03d}] 溫度: {temp:.2f} °C | 狀態: {payload['status']} | 主題: {PAIR_TOPIC}")
+            if temp > 30.0:
+                print("   ⚠️ 晶片升溫偵測中（手指按壓加熱實證生效）！")
+
+            time.sleep(SEND_INTERVAL)
+
+    except KeyboardInterrupt:
+        print("\n使用者手動中斷傳送。")
+    except Exception as e:
+        print(f"\n❌ 傳送異常: {e}")
+    finally:
+        try:
+            client.disconnect()
+            print("MQTT 連線已關閉。")
+        except:
+            pass
+
+if __name__ == "__main__":
+    main()

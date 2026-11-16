@@ -34,6 +34,7 @@ WIFI_PASSWORD = "您的Wi-Fi密碼"
 | 實驗編號 | 程式檔案 | 課程與實作核心 | 核心通訊技術 | 互動與實驗亮點 |
 | :--- | :--- | :--- | :--- | :--- |
 | **實驗 1** | [lab1_mqttgo_iot.py](file:///c:/Nono/Pico2%20W/lab1_mqttgo_iot.py) | **MQTT 物聯網雙向雲端通訊** | MQTT Pub/Sub (TCP 1883) | 連線台灣在地 [MQTTGO.io](https://mqttgo.io/) 免費 Broker。每 5 秒發布內部溫度，並訂閱控制主題；學員直接用手機或電腦瀏覽器打開網頁即時雙向遙控板載 LED！ |
+| **雙機配對** | [lab1_sender.py](file:///c:/Nono/Pico2%20W/lab1_sender.py)<br>[lab1_receiver.py](file:///c:/Nono/Pico2%20W/lab1_receiver.py) | **Pico 2 W 專屬傳送端與接收端** | MQTT 雙機配對互聯 (JSON) | 專為兩塊 Pico 2 W（或兩組學員）打造！傳送端定時將晶片溫度以 JSON 封包射出，發送時 LED 閃爍；接收端訂閱後即時解析，收到數據閃燈，溫度過熱自動狂閃示警！ |
 | **實驗 2** | [lab2_gov_opendata.py](file:///c:/Nono/Pico2%20W/lab2_gov_opendata.py) | **台灣政府開放資料 API 串接** | HTTPS GET / RESTful / JSON 解析 | 串接 [data.gov.tw](https://data.gov.tw/) 政府開放資料平臺 (氣象署測站 API)。以 StationId 精準過濾取得 2KB 輕量 JSON，解析即時天氣與降雨，下雨自動觸發板載 LED 快閃警報！ |
 
 ---
@@ -45,6 +46,21 @@ WIFI_PASSWORD = "您的Wi-Fi密碼"
 2. 打開瀏覽器前往 [https://mqttgo.io/](https://mqttgo.io/)：
    - 在**訂閱主題**輸入 `pico2w/<DEVICE_ID>/temp`，即可每 5 秒看到板載溫度更新。
    - 在**發布主題**輸入 `pico2w/<DEVICE_ID>/led`，訊息填入 `on`、`off` 或 `toggle`，點擊發布即可遠端即時操控 Pico！
+
+---
+
+### 📡 雙機配對：Pico 2 W 傳送端與接收端實戰流程
+專為兩塊 Pico 2 W（或兩組學員分工）設計的獨立收發程式：
+1. **傳送端 (Pico A)**：
+   - 執行 [`lab1_sender.py`](file:///c:/Nono/Pico2%20W/lab1_sender.py)
+   - 每 3 秒讀取 RP2350 內部溫度，封裝為 JSON 格式（`seq`, `temp`, `status`）發布到 `pico2w/pair/data`。
+   - 每發送一筆資料，板載 LED 快速閃爍 1 次，提供直覺的「資料射出」反饋！
+2. **接收端 (Pico B)**：
+   - 執行 [`lab1_receiver.py`](file:///c:/Nono/Pico2%20W/lab1_receiver.py)
+   - 訂閱相同主題 `pico2w/pair/data`，非阻塞靜默監聽。
+   - 一收到封包，Shell 即時印出來源設備與溫度，並觸發板載 LED 閃爍連動！
+   - 當傳送端被手指加熱（溫度 > 30°C），接收端板載 LED 自動連續快閃示警！
+   - 亦支援接收 `on`、`off`、`toggle`、`blink` 等指令。
 
 ---
 

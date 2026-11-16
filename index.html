@@ -680,6 +680,7 @@
                 <li><a href="#mqtt-1hr-plan">⏱️ 【教案】MQTT 1小時課堂規劃</a></li>
                 <li><a href="#lab1-mqtt">📡 【實作】實驗 1：MQTTGO 雙向通訊</a></li>
                 <li><a href="#lab1-tester">🎮 虛擬 Pico 2 W 互動模擬器</a></li>
+                <li><a href="#lab1-pair">👥 【雙機】Pico 2 W 專屬傳送與接收</a></li>
                 <li><a href="#opendata-theory">📘 【理論】政府開放資料與 REST API</a></li>
                 <li><a href="#lab2-opendata">🏛️ 【實作】實驗 2：台灣開放資料 API</a></li>
                 <li><a href="#station-selector">🗺️ 測站查詢與 Live API 測試</a></li>
@@ -1424,6 +1425,215 @@ TOPIC_SUB_LED  = f<span class="c-str">"pico2w/{DEVICE_ID}/led"</span>   <span cl
 📤 [MQTT 發布] 溫度: 28.65 °C -> 主題: pico2w/e6614103e72c8328/temp
 📩 [MQTT 收到指令] 主題: pico2w/e6614103e72c8328/led | 內容: on
 💡 板載 LED 已開啟 (ON)
+                </div>
+            </section>
+
+            <!-- 雙機配對：Pico 2 W 專屬傳送端與接收端實戰 -->
+            <section class="module-section" id="lab1-pair">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <h2 class="section-title">【實作】雙機配對：Pico 2 W 專屬傳送端與接收端實戰</h2>
+                </div>
+                <p class="section-desc">
+                    專為<strong>兩塊 Pico 2 W（或兩組學員互相配合）</strong>打造的獨立分工架構！<br>
+                    一塊作為<strong>專屬傳送端 (Publisher)</strong>，一塊作為<strong>專屬接收端 (Subscriber)</strong>。透過台灣在地 <a href="https://mqttgo.io/" target="_blank" style="color: var(--primary);">MQTTGO.io</a> 雲端中繼，兩塊板子在完全不需要知道對方 IP、甚至連到不同 Wi-Fi 的情況下，實現極低延遲的雙機即時互聯！
+                </p>
+
+                <div class="callout-box" style="margin-top: 10px; margin-bottom: 24px;">
+                    <strong>💡 雙機角色與實體物理反饋分工</strong>：
+                    <br>• <strong>📤 傳送端 (Pico A)</strong>：每 3 秒自動讀取 RP2350 內部溫度，封裝為標準 JSON 格式發布至配對主題 <code>pico2w/pair/data</code>；<strong>每射出一筆資料，板載綠燈快閃 1 下</strong>。
+                    <br>• <strong>📥 接收端 (Pico B)</strong>：訂閱相同主題 <code>pico2w/pair/data</code>；<strong>一收到資料，板載綠燈快閃 2 下</strong>並於 Shell 漂亮印出數據；<strong>當 Pico A 被手指按壓加熱 (>30°C)，Pico B 的板載燈自動連續狂閃示警！</strong>
+                </div>
+
+                <!-- 雙機架構卡片 -->
+                <div class="cards-grid" style="margin-bottom: 24px;">
+                    <div class="card" style="border-top: 3px solid #38bdf8;">
+                        <h3 style="color: #38bdf8;">📤 傳送端 (lab1_sender.py)</h3>
+                        <ul class="card-list">
+                            <li><strong>職責</strong>：採集邊緣端感測數據，定時主動射出封包。</li>
+                            <li><strong>發布主題</strong>：<code>pico2w/pair/data</code></li>
+                            <li><strong>發送內容</strong>：<code>{"seq": 1, "temp": 28.5, "status": "NORMAL"}</code></li>
+                            <li><strong>物理反饋</strong>：發送瞬間綠色 LED 快閃 1 下。</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-top: 3px solid #34d399;">
+                        <h3 style="color: #34d399;">📥 接收端 (lab1_receiver.py)</h3>
+                        <ul class="card-list">
+                            <li><strong>職責</strong>：24 小時靜默監聽，收到封包即時解析與執行反饋。</li>
+                            <li><strong>訂閱主題</strong>：<code>pico2w/pair/data</code></li>
+                            <li><strong>解析聯動</strong>：收到封包快閃 2 次；過熱 (&gt;30°C) 狂閃 4 次示警。</li>
+                            <li><strong>指令支援</strong>：支援手動輸入 <code>on</code>/<code>off</code>/<code>blink</code> 遠端切換。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 程式碼 1：傳送端 -->
+                <div class="code-container" style="margin-bottom: 28px;">
+                    <div class="code-topbar">
+                        <span class="code-filename">lab1_sender.py (傳送端完整代碼，單檔即跑)</span>
+                        <div class="code-actions">
+                            <button class="copy-button" onclick="copyCode(this, 'code-sender')">一鍵複製傳送端代碼</button>
+                        </div>
+                    </div>
+                    <pre class="code-block" id="code-sender"><span class="c-com"># lab1_sender.py - Pico 2 W 專屬傳送端 (MQTT Publisher)</span>
+<span class="c-com"># 適用硬體：Raspberry Pi Pico 2 W (RP2350 + CYW43439)</span>
+<span class="c-com"># 零外接零件：使用 RP2350 內部溫度感測器 (ADC 4) 與板載 LED ("LED")</span>
+
+<span class="c-imp">import</span> time
+<span class="c-imp">import</span> network
+<span class="c-imp">import</span> machine
+<span class="c-imp">from</span> machine <span class="c-imp">import</span> Pin, ADC
+<span class="c-imp">import</span> ubinascii
+<span class="c-imp">import</span> ujson
+<span class="c-imp">from</span> umqtt.simple <span class="c-imp">import</span> MQTTClient
+
+<span class="c-com"># 1. Wi-Fi 設定</span>
+WIFI_SSID = <span class="c-str">"YOUR_WIFI_SSID"</span>          <span class="c-com"># 僅支援 2.4GHz Wi-Fi</span>
+WIFI_PASSWORD = <span class="c-str">"YOUR_WIFI_PASSWORD"</span>
+
+<span class="c-com"># 2. 硬體與主題設定</span>
+led = Pin(<span class="c-str">"LED"</span>, Pin.OUT)
+temp_sensor = ADC(<span class="c-num">4</span>)
+
+MQTT_BROKER = <span class="c-str">"mqttgo.io"</span>
+MQTT_PORT = <span class="c-num">1883</span>
+DEVICE_ID = ubinascii.hexlify(machine.unique_id()).decode(<span class="c-str">'utf-8'</span>)
+CLIENT_ID = f<span class="c-str">"pico2w_sender_{DEVICE_ID[:6]}"</span>
+
+<span class="c-com"># 📡 【核心配對主題】：傳送端與接收端需完全相同！</span>
+PAIR_TOPIC = <span class="c-str">"pico2w/pair/data"</span>
+SEND_INTERVAL = <span class="c-num">3</span>  <span class="c-com"># 每 3 秒發送一次</span>
+
+<span class="c-key">def</span> <span class="c-func">read_temperature</span>():
+    reading = temp_sensor.read_u16() * (<span class="c-num">3.3</span> / <span class="c-num">65535</span>)
+    <span class="c-key">return</span> <span class="c-num">27</span> - (reading - <span class="c-num">0.706</span>) / <span class="c-num">0.001721</span>
+
+<span class="c-key">def</span> <span class="c-func">blink_led</span>(times=<span class="c-num">1</span>, duration=<span class="c-num">0.08</span>):
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(times):
+        led.on(); time.sleep(duration); led.off(); time.sleep(duration)
+
+<span class="c-key">def</span> <span class="c-func">connect_wifi</span>():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(<span class="c-key">True</span>)
+    <span class="c-key">if</span> <span class="c-key">not</span> wlan.isconnected():
+        print(f<span class="c-str">"📡 [傳送端] 正在連線 Wi-Fi: {WIFI_SSID} ..."</span>)
+        wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+        timeout = <span class="c-num">20</span>
+        <span class="c-key">while</span> <span class="c-key">not</span> wlan.isconnected() <span class="c-key">and</span> timeout &gt; <span class="c-num">0</span>:
+            time.sleep(<span class="c-num">0.5</span>); timeout -= <span class="c-num">1</span>; print(<span class="c-str">"."</span>, end=<span class="c-str">""</span>)
+    <span class="c-key">if</span> wlan.isconnected():
+        print(f<span class="c-str">"\n✅ [傳送端] Wi-Fi 連線成功！IP: {wlan.ifconfig()[0]}"</span>)
+        <span class="c-key">return</span> <span class="c-key">True</span>
+    <span class="c-key">return</span> <span class="c-key">False</span>
+
+<span class="c-key">def</span> <span class="c-func">main</span>():
+    <span class="c-key">if</span> <span class="c-key">not</span> connect_wifi(): <span class="c-key">return</span>
+    client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, keepalive=<span class="c-num">60</span>)
+    client.connect()
+    print(f<span class="c-str">"✅ MQTT Broker 連線成功！配對主題: {PAIR_TOPIC}\n"</span>)
+
+    seq = <span class="c-num">0</span>
+    <span class="c-key">while</span> <span class="c-key">True</span>:
+        seq += <span class="c-num">1</span>
+        temp = read_temperature()
+        payload = {
+            <span class="c-str">"seq"</span>: seq,
+            <span class="c-str">"sender"</span>: CLIENT_ID,
+            <span class="c-str">"temp"</span>: round(temp, <span class="c-num">2</span>),
+            <span class="c-str">"status"</span>: <span class="c-str">"HOT"</span> <span class="c-key">if</span> temp &gt; <span class="c-num">30.0</span> <span class="c-key">else</span> <span class="c-str">"NORMAL"</span>
+        }
+        client.publish(PAIR_TOPIC, ujson.dumps(payload))
+        blink_led(<span class="c-num">1</span>, <span class="c-num">0.1</span>)  <span class="c-com"># 發送成功快閃 1 下</span>
+        print(f<span class="c-str">"📤 [已送出 #{seq:03d}] 溫度: {temp:.2f} °C | 狀態: {payload['status']}"</span>)
+        time.sleep(SEND_INTERVAL)
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre>
+                </div>
+
+                <!-- 程式碼 2：接收端 -->
+                <div class="code-container">
+                    <div class="code-topbar">
+                        <span class="code-filename">lab1_receiver.py (接收端完整代碼，單檔即跑)</span>
+                        <div class="code-actions">
+                            <button class="copy-button" onclick="copyCode(this, 'code-receiver')">一鍵複製接收端代碼</button>
+                        </div>
+                    </div>
+                    <pre class="code-block" id="code-receiver"><span class="c-com"># lab1_receiver.py - Pico 2 W 專屬接收端 (MQTT Subscriber)</span>
+<span class="c-com"># 適用硬體：Raspberry Pi Pico 2 W (RP2350 + CYW43439)</span>
+<span class="c-com"># 零外接零件：使用板載綠色 LED ("LED") 進行實體接收反饋</span>
+
+<span class="c-imp">import</span> time
+<span class="c-imp">import</span> network
+<span class="c-imp">import</span> machine
+<span class="c-imp">from</span> machine <span class="c-imp">import</span> Pin
+<span class="c-imp">import</span> ubinascii
+<span class="c-imp">import</span> ujson
+<span class="c-imp">from</span> umqtt.simple <span class="c-imp">import</span> MQTTClient
+
+<span class="c-com"># 1. Wi-Fi 設定</span>
+WIFI_SSID = <span class="c-str">"YOUR_WIFI_SSID"</span>          <span class="c-com"># 僅支援 2.4GHz Wi-Fi</span>
+WIFI_PASSWORD = <span class="c-str">"YOUR_WIFI_PASSWORD"</span>
+
+<span class="c-com"># 2. 硬體與主題設定</span>
+led = Pin(<span class="c-str">"LED"</span>, Pin.OUT)
+MQTT_BROKER = <span class="c-str">"mqttgo.io"</span>
+MQTT_PORT = <span class="c-num">1883</span>
+DEVICE_ID = ubinascii.hexlify(machine.unique_id()).decode(<span class="c-str">'utf-8'</span>)
+CLIENT_ID = f<span class="c-str">"pico2w_recv_{DEVICE_ID[:6]}"</span>
+
+<span class="c-com"># 📡 【核心配對主題】：必須與 lab1_sender.py 完全一致！</span>
+PAIR_TOPIC = <span class="c-str">"pico2w/pair/data"</span>
+recv_count = <span class="c-num">0</span>
+
+<span class="c-key">def</span> <span class="c-func">blink_led</span>(times=<span class="c-num">2</span>, duration=<span class="c-num">0.08</span>):
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(times):
+        led.on(); time.sleep(duration); led.off(); time.sleep(duration)
+
+<span class="c-key">def</span> <span class="c-func">on_message_received</span>(topic, msg):
+    <span class="c-key">global</span> recv_count
+    recv_count += <span class="c-num">1</span>
+    raw_str = msg.decode(<span class="c-str">"utf-8"</span>).strip()
+    print(f<span class="c-str">"\n📥 [收到封包 #{recv_count:03d}] 主題: {topic.decode('utf-8')}"</span>)
+
+    <span class="c-key">try</span>:
+        data = ujson.loads(raw_str)
+        temp = data.get(<span class="c-str">"temp"</span>, <span class="c-key">None</span>)
+        status = data.get(<span class="c-str">"status"</span>, <span class="c-str">"NORMAL"</span>)
+        print(f<span class="c-str">"   來源: {data.get('sender')} | 序號: #{data.get('seq')} | 溫度: {temp}°C | 狀態: {status}"</span>)
+
+        <span class="c-key">if</span> status == <span class="c-str">"HOT"</span> <span class="c-key">or</span> (temp <span class="c-key">and</span> temp &gt; <span class="c-num">30.0</span>):
+            print(<span class="c-str">"   🚨 收到晶片過熱警報！板載 LED 快閃示警！"</span>)
+            blink_led(<span class="c-num">4</span>, <span class="c-num">0.06</span>)  <span class="c-com"># 過熱狂閃 4 次</span>
+        <span class="c-key">else</span>:
+            blink_led(<span class="c-num">2</span>, <span class="c-num">0.08</span>)  <span class="c-com"># 正常接收閃 2 次</span>
+    <span class="c-key">except</span> Exception:
+        <span class="c-com"># 文字指令相容 (on / off / toggle / blink)</span>
+        cmd = raw_str.lower()
+        <span class="c-key">if</span> cmd == <span class="c-str">"on"</span>: led.on()
+        <span class="c-key">elif</span> cmd == <span class="c-str">"off"</span>: led.off()
+        <span class="c-key">elif</span> cmd == <span class="c-str">"toggle"</span>: led.toggle()
+        <span class="c-key">elif</span> cmd == <span class="c-str">"blink"</span>: blink_led(<span class="c-num">3</span>, <span class="c-num">0.12</span>)
+
+<span class="c-key">def</span> <span class="c-func">main</span>():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(<span class="c-key">True</span>)
+    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+    <span class="c-key">while</span> <span class="c-key">not</span> wlan.isconnected(): time.sleep(<span class="c-num">0.5</span>)
+    print(f<span class="c-str">"✅ [接收端] Wi-Fi 連線成功！IP: {wlan.ifconfig()[0]}"</span>)
+
+    client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, keepalive=<span class="c-num">60</span>)
+    client.set_callback(on_message_received)
+    client.connect()
+    client.subscribe(PAIR_TOPIC)
+    print(f<span class="c-str">"📡 已訂閱配對主題: {PAIR_TOPIC}，正在靜默監聽中...\n"</span>)
+
+    <span class="c-key">while</span> <span class="c-key">True</span>:
+        client.check_msg()
+        time.sleep(<span class="c-num">0.05</span>)
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre>
                 </div>
             </section>
 
