@@ -285,69 +285,97 @@ def on_message_received(topic, msg):
     print(f"║ 📏 內容長度        : {len(raw_str)} Bytes")
     print("╟" + "─" * 63 + "╢")
     
-    # 若為 JSON 格式則自動排版展開，若為純文字則直接清楚顯示
+    # 判斷是否為結構化 JSON (物件或陣列)
+    is_json = False
     try:
         json_data = ujson.loads(raw_str)
-        print("║ 📦 訊息格式        : [標準 JSON 結構]")
-        print("║ 📄 訊息內容如下    :")
-        for key, val in json_data.items():
-            print(f"║    ▶ {key}: {val}")
+        if isinstance(json_data, dict):
+            is_json = True
+            print("║ 📦 訊息格式        : [標準 JSON 鍵值結構]")
+            print("║ 📄 訊息內容如下    :")
+            for key, val in json_data.items():
+                print(f"║    ▶ {key}: {val}")
+        elif isinstance(json_data, list):
+            is_json = True
+            print("║ 📦 訊息格式        : [JSON 陣列清單]")
+            for idx, item in enumerate(json_data):
+                print(f"║    ▶ [{idx}]: {item}")
     except Exception:
-        print("║ 📦 訊息格式        : [純文字 / 字串]")
+        pass
+        
+    if not is_json:
+        print("║ 📦 訊息格式        : [純文字 / 數值]")
         print(f"║ 📄 訊息內容        : {raw_str}")
         
     print("╚" + "═" * 63 + "╝\n")
 
 def main():
     print("\n" + "=" * 65)
-    print("🚀 Pico 2 W - MQTTGO 特定主題訊息監聽程式")
+    print("🚀 Pico 2 W - MQTTGO 特定主題訊息監聽程式 (長效保活版)")
     print("=" * 65)
     
-    if not connect_wifi():
-        return
-        
-    print(f"\n正在連線至 MQTTGO 伺服器: {MQTT_BROKER}:{MQTT_PORT} ...")
-    print(f"客戶端名稱 (Client ID): {CLIENT_ID}")
-    
-    client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, keepalive=60)
-    client.set_callback(on_message_received)
-    
-    try:
-        client.connect()
-        print("✅ MQTT Broker 連線成功！")
-        
-        # 訂閱您指定的特定主題
-        client.subscribe(TARGET_TOPIC)
-        print(f"📡 【已成功訂閱特定主題】: {TARGET_TOPIC}")
-        
-        # 輸出操作提示
-        print("\n" + "-" * 65)
-        print("🌐 【如何測試發送訊息給 Pico 2 W？】")
-        print("👉 請用電腦或手機開啟： https://mqttgo.io/")
-        print("1. 在網頁中的「發布主題 (Topic)」填入：")
-        print(f"   {TARGET_TOPIC}")
-        print("2. 在「發布訊息 (Message)」輸入任意文字或 JSON，例如：")
-        print("   Hello Pico 2 W!")
-        print("   或 {\"msg\": \"早安\", \"temp\": 25.5}")
-        print("3. 點擊「發布」，Pico 2 W 通訊列將會立即格式化顯示訊息！")
-        print("-" * 65 + "\n")
-        print(f"⏳ 正在監聽中... (隨時等待來自 [{TARGET_TOPIC}] 的新訊息)")
-        
-        while True:
-            # 非阻塞檢查雲端是否有新訊息
-            client.check_msg()
-            time.sleep(0.05)
+    # 輸出操作指引
+    print("\n" + "-" * 65)
+    print("🌐 【如何測試發送訊息給 Pico 2 W？】")
+    print("👉 請用電腦或手機開啟： https://mqttgo.io/")
+    print("1. 在網頁中的「發布主題 (Topic)」填入：")
+    print(f"   {TARGET_TOPIC}")
+    print("2. 在「發布訊息 (Message)」輸入任意文字或 JSON，例如：")
+    print("   Hello Pico 2 W!")
+    print("   或 {\"msg\": \"早安\", \"temp\": 25.5}")
+    print("3. 點擊「發布」，Pico 2 W 通訊列將會立即格式化顯示訊息！")
+    print("-" * 65 + "\n")
+
+    # 長效監聽迴圈 (支援心跳保活與自動斷線重連)
+    while True:
+        if not connect_wifi():
+            print("等待 3 秒後重試 Wi-Fi 連線...")
+            time.sleep(3)
+            continue
             
-    except KeyboardInterrupt:
-        print("\n🛑 使用者手動中斷程式。")
-    except Exception as e:
-        print(f"\n❌ 監聽異常: {e}")
-    finally:
+        print(f"\n正在連線至 MQTTGO 伺服器: {MQTT_BROKER}:{MQTT_PORT} ...")
+        print(f"客戶端名稱 (Client ID): {CLIENT_ID}")
+        
+        client = MQTTClient(CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, keepalive=60)
+        client.set_callback(on_message_received)
+        
         try:
-            client.disconnect()
-            print("MQTT 連線已關閉。")
-        except:
-            pass
+            client.connect()
+            print("✅ MQTT Broker 連線成功！")
+            
+            # 訂閱您指定的特定主題
+            client.subscribe(TARGET_TOPIC)
+            print(f"📡 【已成功訂閱特定主題】: {TARGET_TOPIC}")
+            print(f"⏳ 正在長效監聽中... (已啟用 20 秒心跳保活機制)")
+            
+            last_ping_time = time.time()
+            while True:
+                # 非阻塞檢查雲端是否有新訊息
+                client.check_msg()
+                
+                # 每 20 秒定時發送 PINGREQ 心跳保活，防止被 Broker 超時斷線 (解決 -1 異常)
+                now = time.time()
+                if now - last_ping_time >= 20:
+                    client.ping()
+                    last_ping_time = now
+                    
+                time.sleep(0.05)
+                
+        except KeyboardInterrupt:
+            print("\n🛑 使用者手動中斷程式。")
+            try:
+                client.disconnect()
+                print("MQTT 連線已關閉。")
+            except:
+                pass
+            break
+        except Exception as e:
+            print(f"\n⚠️ 連線暫時中斷 (原因: {e})，3 秒後自動重新連線...")
+            try:
+                client.disconnect()
+            except:
+                pass
+            time.sleep(3)
 
 if __name__ == "__main__":
     main()
