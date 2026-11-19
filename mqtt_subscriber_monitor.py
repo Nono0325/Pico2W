@@ -310,10 +310,6 @@ def on_message_received(topic, msg):
     print("╚" + "═" * 63 + "╝\n")
 
 def main():
-    print("\n" + "=" * 65)
-    print("🚀 Pico 2 W - MQTTGO 特定主題訊息監聽程式 (長效保活版)")
-    print("=" * 65)
-    
     # 輸出操作指引
     print("\n" + "-" * 65)
     print("🌐 【如何測試發送訊息給 Pico 2 W？】")
@@ -346,7 +342,7 @@ def main():
             # 訂閱您指定的特定主題
             client.subscribe(TARGET_TOPIC)
             print(f"📡 【已成功訂閱特定主題】: {TARGET_TOPIC}")
-            print(f"⏳ 正在長效監聽中... (已啟用 20 秒心跳保活機制)")
+            print(f"⏳ 正在長效監聽中... ")
             
             last_ping_time = time.time()
             while True:

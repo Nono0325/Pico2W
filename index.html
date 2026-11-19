@@ -681,6 +681,8 @@
                 <li><a href="#lab1-mqtt">📡 【實作】實驗 1：MQTTGO 雙向通訊</a></li>
                 <li><a href="#lab1-tester">🎮 虛擬 Pico 2 W 互動模擬器</a></li>
                 <li><a href="#lab1-pair">👥 【雙機】Pico 2 W 專屬傳送與接收</a></li>
+                <li><a href="#webserver-1hr-plan">⏱️ 【教案】邊緣Web Server 1小時規劃</a></li>
+                <li><a href="#lab2-webserver">🌐 【實作】邊緣微型 Web Server</a></li>
                 <li><a href="#opendata-theory">📘 【理論】政府開放資料與 REST API</a></li>
                 <li><a href="#lab2-opendata">🏛️ 【實作】實驗 2：台灣開放資料 API</a></li>
                 <li><a href="#station-selector">🗺️ 測站查詢與 Live API 測試</a></li>
@@ -1631,6 +1633,329 @@ recv_count = <span class="c-num">0</span>
     <span class="c-key">while</span> <span class="c-key">True</span>:
         client.check_msg()
         time.sleep(<span class="c-num">0.05</span>)
+
+<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
+    main()</pre>
+                </div>
+            </section>
+
+            <!-- 教案規劃：邊緣微型 Web Server 1 小時極速實作教案 -->
+            <section class="module-section" id="webserver-1hr-plan">
+                <div class="section-header">
+                    <span class="section-icon">⏱️</span>
+                    <h2 class="section-title">【實作教案】Pico 2 W 邊緣微型 Web Server：1 小時極速實作教案</h2>
+                </div>
+                <p class="section-desc">
+                    <strong>以實作為核心（動手率 &gt; 90%）</strong>。讓微控制器從物聯網客戶端徹底變身為真正的「邊緣伺服器 (Edge Server)」！
+                    利用板載 RP2350 內部溫度 (ADC 4) 與板載綠色 LED，<strong>零外接零件、直接在電腦或手機瀏覽器輸入 Pico IP</strong>，即可享受現代深色質感儀表板、即時手指物理升溫實證，並以網頁按鈕無線遙控實體板載硬體！
+                </p>
+
+                <div class="callout-box" style="margin-top: 10px; margin-bottom: 24px;">
+                    <strong>💡 核心觀念前後呼應與反轉突破</strong>：
+                    <br>• <strong>上週 MQTT 課程</strong>：Pico 是 <strong>Client (客戶端)</strong>，主動向雲端發送，Port 80 關閉，故在瀏覽器開啟 192.168.x.x 會顯示拒絕連線。
+                    <br>• <strong>本週 Web Server 課程</strong>：Pico 在 Port 80 監聽，化身為 <strong>Edge Server (微型邊緣伺服器)</strong>！全班只要在手機或電腦瀏覽器輸入 <code>http://192.168.x.x</code>，由 Pico 2 W 親自送出 HTML 網頁！對應完整教學手冊請見 <a href="LESSON_PLAN_WEBSERVER_1HR.md" target="_blank" style="color: var(--primary);"><code>LESSON_PLAN_WEBSERVER_1HR.md</code></a>。
+                </div>
+
+                <!-- 課程時間與配比 -->
+                <div class="data-table-container" style="margin-bottom: 24px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 130px;">時間配比</th>
+                                <th style="width: 160px;">實作任務</th>
+                                <th>實作核心活動</th>
+                                <th style="width: 220px;">學生具體動手產出</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-cyan">00 - 05 min</span></td>
+                                <td><strong>任務 0：閃電啟動</strong></td>
+                                <td>填入 Wi-Fi 帳密、F5 啟動 Web 伺服器</td>
+                                <td>瀏覽器輸入 <code>http://192.168.x.x</code> 看到第一張網頁</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-green">05 - 18 min</span></td>
+                                <td><strong>實作 1：邊緣儀表板</strong></td>
+                                <td>讀取內部溫度、手指按壓晶片物理升溫實證</td>
+                                <td>網頁刷新見溫升 5°C；<strong>動手改碼修改網頁外觀</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-purple">18 - 32 min</span></td>
+                                <td><strong>實作 2：邊緣雙向控制</strong></td>
+                                <td>網頁按鈕無線遙控板載實體綠色 LED</td>
+                                <td>點擊 ON/OFF/TOGGLE 即刻點燈；<strong>動手改碼新增按鈕</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">32 - 46 min</span></td>
+                                <td><strong>實作 3：現代無重整 API</strong></td>
+                                <td>剖析 <code>/api/status</code> 與 AJAX 非同步輪詢</td>
+                                <td>觀察每 2 秒平滑自動刷新；<strong>動手改碼擴充 JSON 欄位</strong></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border-color: rgba(236, 72, 153, 0.4);">46 - 56 min</span></td>
+                                <td><strong>實作 4：全班區網互連</strong></td>
+                                <td>手機跨桌連線、隔空遙控同學板子</td>
+                                <td>左右同學互開手機瀏覽器，跨桌控制對方的實體 LED</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4);">56 - 60 min</span></td>
+                                <td><strong>實作 5：架構對比總結</strong></td>
+                                <td>MQTT vs Web Server 核心差異歸納</td>
+                                <td>完成實作檢核表打勾；建立正確 Client vs Server 認知</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 階梯式 4 大實戰關卡引導與動手改碼 -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>🛠️ 階梯式實作任務引導與學生動手改碼指南</h3>
+                    
+                    <div class="step-list">
+                        <!-- 任務 0 -->
+                        <div class="step-item">
+                            <div class="step-num">0</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #38bdf8;">【00 - 05 min】任務 0：閃電啟動 ── MicroPython Socket Web Server 跑起來</h4>
+                                    <span class="badge badge-cyan">3 分鐘動手</span>
+                                </div>
+                                <p style="font-size: 0.92rem; color: #cbd5e1;">
+                                    1. 打開 <code>lab2_web_server.py</code>，修改第 19、20 行的 Wi-Fi 帳密。<br>
+                                    2. 按下 <strong>F5</strong> 執行，觀察 Shell 印出本機 IP（如 <code>192.168.50.3</code>）。<br>
+                                    3. 打開 Chrome 或 Edge 瀏覽器，在網址列直接輸入 <code>http://192.168.50.3</code>，秒速開啟現代深色儀表板！
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 任務 1 -->
+                        <div class="step-item">
+                            <div class="step-num">1</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #34d399;">【05 - 18 min】實作 1：邊緣儀表板 ── 晶片內部溫度與手指加熱物理實證</h4>
+                                    <span class="badge badge-green">13 分鐘實作</span>
+                                </div>
+                                <p style="font-size: 0.92rem; color: #cbd5e1;">
+                                    1. 觀察網頁上的「RP2350 晶片溫度」與「運行時間 (Uptime)」。<br>
+                                    2. <strong>物理體驗</strong>：請學生<strong>用食指用力按住 RP2350 黑色主晶片 10 秒鐘</strong>，重新整理網頁，親眼見證溫度從 28°C 飆升至 33°C！
+                                </p>
+                                <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #34d399; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
+                                    <strong style="color: #34d399;">🛠️ 學生動手改碼挑戰 A：個人化儀表板與 CSS 主題色</strong>
+                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 0 0;">找到 <code>build_html_page</code> 函式內的 <code>&lt;h1&gt;</code> 標題改為自己的學號姓名，並將 <code>--primary: #38bdf8;</code> 改為橘黃色 <code>#f59e0b</code> 或紫粉色 <code>#ec4899</code>，存檔按 F5 刷新！</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 任務 2 -->
+                        <div class="step-item">
+                            <div class="step-num">2</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #c084fc;">【18 - 32 min】實作 2：邊緣雙向控制 ── 手機/網頁按鈕無線遙控實體板載綠燈</h4>
+                                    <span class="badge badge-purple">14 分鐘實作</span>
+                                </div>
+                                <p style="font-size: 0.92rem; color: #cbd5e1;">
+                                    1. 在網頁點擊「💡 開燈 (ON)」、「💤 關燈 (OFF)」或「🔄 切換」，實體板載綠色 LED 瞬間亮起與熄滅！<br>
+                                    2. 觀察 Thonny Shell 終端機即時印出 HTTP GET 請求日誌。
+                                </p>
+                                <div style="background: rgba(168, 85, 247, 0.08); border-left: 3px solid #c084fc; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
+                                    <strong style="color: #c084fc;">🛠️ 學生動手改碼挑戰 B：擴充「🚨 SOS 摩斯密碼警報」按鈕</strong>
+                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 6px 0;">在按鈕群新增按鈕，並在路由加入三短三長三短閃爍邏輯：</p>
+                                    <pre class="code-block" style="margin: 0;"><span class="c-com"># lab2_web_server.py (在 path.startswith("/api/led") 擴充)</span>
+<span class="c-key">elif</span> <span class="c-str">"state=sos"</span> <span class="c-key">in</span> path:
+    print(<span class="c-str">"🚨 觸發 SOS 警報！"</span>)
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.1</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.3</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.1</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 任務 3 -->
+                        <div class="step-item">
+                            <div class="step-num">3</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #facc15;">【32 - 46 min】實作 3：現代無重整體驗 ── RESTful JSON API 與 AJAX 動態輪詢</h4>
+                                    <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">14 分鐘實作</span>
+                                </div>
+                                <p style="font-size: 0.92rem; color: #cbd5e1;">
+                                    1. 手動在瀏覽器開啟 <code>http://192.168.x.x/api/status</code>，看見微控制器輸出的純 JSON 數據。<br>
+                                    2. 回到首頁，雙手放開鍵盤，頁面透過內嵌 JavaScript <code>fetch()</code> 每 2 秒無感自動刷新數據，免手動按 F5！
+                                </p>
+                                <div style="background: rgba(234, 179, 8, 0.08); border-left: 3px solid #facc15; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
+                                    <strong style="color: #facc15;">🛠️ 學生動手改碼挑戰 C：擴充 JSON 警報標籤</strong>
+                                    <pre class="code-block" style="margin: 6px 0 0 0;"><span class="c-com"># lab2_web_server.py (在 /api/status 路由字典加入)</span>
+payload = {
+    <span class="c-str">"temp"</span>: round(temp, <span class="c-num">2</span>),
+    <span class="c-str">"led"</span>: led.value(),
+    <span class="c-str">"uptime"</span>: uptime,
+    <span class="c-str">"alert"</span>: <span class="c-str">"OVERHEAT"</span> <span class="c-key">if</span> temp &gt; <span class="c-num">30.0</span> <span class="c-key">else</span> <span class="c-str">"NORMAL"</span>
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 任務 4 -->
+                        <div class="step-item">
+                            <div class="step-num">4</div>
+                            <div class="step-content" style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="margin: 0; color: #f472b6;">【46 - 56 min】實作 4：全班區網互連 ── 手機跨桌連線與邊緣伺服器大尋寶</h4>
+                                    <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border-color: rgba(236, 72, 153, 0.4);">10 分鐘競賽</span>
+                                </div>
+                                <p style="font-size: 0.92rem; color: #cbd5e1;">
+                                    <strong>玩法 1：手機無線遙控</strong>：手機連上教室同一 Wi-Fi，打開 Safari/Chrome 輸入自己 Pico 的 IP，在教室任一角落走動皆可點燈！<br>
+                                    <strong>玩法 2：隔空點燈大尋寶</strong>：左右兩位同學互報 IP，同學 A 用手機開啟同學 B 的儀表板，隔空幫同學 B 點燈，體會真正的 Edge Computing 魅力！
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 學生實作評量檢核清單 (Rubric) 與 SOP -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <h3>📋 學生實作評量檢核清單 (Rubric)</h3>
+                        <div class="data-table-container" style="margin: 10px 0 0 0;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>評量項目</th>
+                                        <th>檢核指標 (完成打勾)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Web Server 啟動</strong></td>
+                                        <td>成功在 Port 80 監聽，瀏覽器輸入 IP 能順利開啟深色儀表板</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>物理升溫實證</strong></td>
+                                        <td>手指捏緊 RP2350 晶片 10 秒後，網頁數值明確跳升 5°C</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>網頁雙向遙控</strong></td>
+                                        <td>點擊網頁 ON / OFF 按鈕，實體板載綠色 LED 精準響應</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>RESTful API 驗證</strong></td>
+                                        <td>手動輸入 <code>/api/status</code> 能看見 JSON，且首頁每 2 秒自動刷新</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>手機或跨桌互控</strong></td>
+                                        <td>能使用手機或連線隔壁同學 Pico IP 進行無線跨設備控制</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>🚨 現場突發狀況快速救急 SOP</h3>
+                        <ul class="card-list">
+                            <li><strong>瀏覽器輸入 IP 一直轉圈圈逾時</strong>：
+                                <br><span style="color: #f87171;">95% 原創原因</span>：電腦/手機與 Pico 2 W 連到了不同的 Wi-Fi（例如電腦連手機熱點，Pico 連教室 Wi-Fi；或是 AP 開啟了客戶端隔離）。請確認所有設備連在同一台 2.4GHz 熱點！
+                            </li>
+                            <li><strong>提示 EADDRINUSE (Port 80 被佔用)</strong>：
+                                <br>在 Thonny 按下紅色「Stop/Restart」按鈕軟重啟 Pico，或拔插 USB 重新連線即可。
+                            </li>
+                            <li><strong>點擊按鈕 LED 沒反應</strong>：
+                                <br>確認 Pico 2 W 主迴圈是否仍在正常運行，查看 Thonny Shell 是否印出 HTTP 請求日誌。
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 實作模組：邊緣微型 Web Server 程式碼 -->
+            <section class="module-section" id="lab2-webserver">
+                <div class="section-header">
+                    <span class="section-icon">🌐</span>
+                    <h2 class="section-title">【實作】Pico 2 W 邊緣微型 Web Server (lab2_web_server.py)</h2>
+                </div>
+                <p class="section-desc">
+                    <strong>單檔即跑（All-in-One Standalone）</strong>。內建響應式現代化深色 CSS 儀表板、RESTful API 路由與 AJAX 非同步動態輪詢！
+                </p>
+
+                <!-- 完整原始碼卡片 -->
+                <div class="code-container" style="margin-bottom: 28px;">
+                    <div class="code-topbar">
+                        <span class="code-filename">lab2_web_server.py (完整代碼，單檔即跑)</span>
+                        <div class="code-actions">
+                            <button class="copy-button" onclick="copyCode(this, 'code-webserver')">一鍵複製伺服器程式碼</button>
+                        </div>
+                    </div>
+                    <pre class="code-block" id="code-webserver"><span class="c-com"># lab2_web_server.py - Pico 2 W 邊緣微型 Web Server (Edge Web Server)</span>
+<span class="c-imp">import</span> time
+<span class="c-imp">import</span> network
+<span class="c-imp">import</span> machine
+<span class="c-imp">from</span> machine <span class="c-imp">import</span> Pin, ADC
+<span class="c-imp">import</span> usocket <span class="c-imp">as</span> socket
+<span class="c-imp">import</span> ujson
+<span class="c-imp">import</span> gc
+
+<span class="c-com"># 1. Wi-Fi 連線設定</span>
+WIFI_SSID = <span class="c-str">"YOUR_WIFI_SSID"</span>          <span class="c-com"># 僅支援 2.4GHz Wi-Fi</span>
+WIFI_PASSWORD = <span class="c-str">"YOUR_WIFI_PASSWORD"</span>
+
+<span class="c-com"># 2. 硬體初始化</span>
+led = Pin(<span class="c-str">"LED"</span>, Pin.OUT)
+temp_sensor = ADC(<span class="c-num">4</span>)
+start_time = time.time()
+request_count = <span class="c-num">0</span>
+
+<span class="c-key">def</span> <span class="c-func">read_temperature</span>():
+    reading = temp_sensor.read_u16() * (<span class="c-num">3.3</span> / <span class="c-num">65535</span>)
+    <span class="c-key">return</span> <span class="c-num">27</span> - (reading - <span class="c-num">0.706</span>) / <span class="c-num">0.001721</span>
+
+<span class="c-key">def</span> <span class="c-func">blink_led</span>(times=<span class="c-num">3</span>, duration=<span class="c-num">0.1</span>):
+    <span class="c-key">for</span> _ <span class="c-key">in</span> range(times):
+        led.on(); time.sleep(duration); led.off(); time.sleep(duration)
+
+<span class="c-key">def</span> <span class="c-func">connect_wifi</span>():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(<span class="c-key">True</span>)
+    <span class="c-key">if</span> <span class="c-key">not</span> wlan.isconnected():
+        wlan.connect(WIFI_SSID, WIFI_PASSWORD)
+        timeout = <span class="c-num">25</span>
+        <span class="c-key">while</span> <span class="c-key">not</span> wlan.isconnected() <span class="c-key">and</span> timeout &gt; <span class="c-num">0</span>:
+            time.sleep(<span class="c-num">0.5</span>); timeout -= <span class="c-num">1</span>
+    <span class="c-key">return</span> wlan.ifconfig()[<span class="c-num">0</span>] <span class="c-key">if</span> wlan.isconnected() <span class="c-key">else</span> <span class="c-key">None</span>
+
+<span class="c-key">def</span> <span class="c-func">main</span>():
+    <span class="c-key">global</span> request_count
+    ip = connect_wifi()
+    <span class="c-key">if</span> <span class="c-key">not</span> ip: <span class="c-key">return</span>
+    
+    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="c-num">1</span>)
+    server_sock.bind((<span class="c-str">"0.0.0.0"</span>, <span class="c-num">80</span>))
+    server_sock.listen(<span class="c-num">5</span>)
+    print(f<span class="c-str">"🎉 Web Server 已啟動！請用瀏覽器開啟： http://{ip}"</span>)
+
+    <span class="c-key">while</span> <span class="c-key">True</span>:
+        client_sock, client_addr = server_sock.accept()
+        raw_req = client_sock.recv(<span class="c-num">1024</span>).decode(<span class="c-str">"utf-8"</span>, <span class="c-str">"ignore"</span>)
+        path = raw_req.split(<span class="c-str">" "</span>)[<span class="c-num">1</span>] <span class="c-key">if</span> <span class="c-str">" "</span> <span class="c-key">in</span> raw_req <span class="c-key">else</span> <span class="c-str">"/"</span>
+        
+        <span class="c-key">if</span> path == <span class="c-str">"/api/status"</span>:
+            body = ujson.dumps({<span class="c-str">"temp"</span>: round(read_temperature(), <span class="c-num">2</span>), <span class="c-str">"led"</span>: led.value(), <span class="c-str">"uptime"</span>: time.time() - start_time})
+            client_sock.sendall(f<span class="c-str">"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{body}"</span>.encode(<span class="c-str">"utf-8"</span>))
+        <span class="c-key">elif</span> path.startswith(<span class="c-str">"/api/led"</span>):
+            <span class="c-key">if</span> <span class="c-str">"state=on"</span> <span class="c-key">in</span> path: led.on()
+            <span class="c-key">elif</span> <span class="c-str">"state=off"</span> <span class="c-key">in</span> path: led.off()
+            <span class="c-key">elif</span> <span class="c-str">"state=toggle"</span> <span class="c-key">in</span> path: led.toggle()
+            <span class="c-key">elif</span> <span class="c-str">"state=blink"</span> <span class="c-key">in</span> path: blink_led(<span class="c-num">3</span>, <span class="c-num">0.12</span>)
+            client_sock.sendall(b<span class="c-str">"HTTP/1.1 303 See Other\r\nLocation: /\r\nConnection: close\r\n\r\n"</span>)
+        <span class="c-key">else</span>:
+            <span class="c-com"># 回傳儀表板 HTML (詳見完整 lab2_web_server.py)</span>
+            html = f<span class="c-str">"&lt;h1&gt;Pico 2 W Web Server ({ip})&lt;/h1&gt;&lt;p&gt;Temp: {read_temperature():.2f}&amp;deg;C&lt;/p&gt;&lt;a href='/api/led?state=toggle'&gt;Toggle LED&lt;/a&gt;"</span>
+            client_sock.sendall(f<span class="c-str">"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n{html}"</span>.encode(<span class="c-str">"utf-8"</span>))
+        client_sock.close()
+        gc.collect()
 
 <span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
     main()</pre>

@@ -2,10 +2,12 @@
 
 > 🌐 **線上互動教材網頁**：[https://nono0325.github.io/Pico2W/](https://nono0325.github.io/Pico2W/)（免安裝，手機與電腦瀏覽器隨開即學）
 
-本專案專為 **Raspberry Pi Pico 2 W (RP2350 + CYW43439)** 打造，精選兩大現代物聯網核心實務課程與實驗：
-1. **課程與實驗 1：MQTT 物聯網雙向雲端通訊 (使用台灣在地 [MQTTGO.io](https://mqttgo.io/) 平台)**
+本專案專為 **Raspberry Pi Pico 2 W (RP2350 + CYW43439)** 打造，精選現代物聯網核心實務課程與實驗：
+1. **課程 1：MQTT 物聯網雙向雲端通訊 (使用台灣在地 [MQTTGO.io](https://mqttgo.io/) 平台)**
    * ⏱️ **專用課堂教案**：[LESSON_PLAN_MQTT_1HR.md](file:///c:/Nono/Pico2%20W/LESSON_PLAN_MQTT_1HR.md)（專為 60 分鐘工作坊規劃的極速上手實戰教案）
-2. **課程與實驗 2：台灣政府開放資料 (data.gov.tw) API 串接與智慧燈號警報**
+2. **課程 2：Pico 2 W 邊緣微型 Web Server (Edge Web Server ✕ RESTful API)**
+   * ⏱️ **專用課堂教案**：[LESSON_PLAN_WEBSERVER_1HR.md](file:///c:/Nono/Pico2%20W/LESSON_PLAN_WEBSERVER_1HR.md)（專為 60 分鐘規劃的邊緣伺服器與無重整 AJAX 實戰教案）
+3. **課程 3：台灣政府開放資料 (data.gov.tw) API 串接與智慧燈號警報**
 
 > 💡 **零外接硬體門檻 & 單檔即跑設計 (All-in-One Standalone)**：  
 > 全系列實驗完全不需要外接麵包板或感測器模組，直接善用 Pico 2 W 板載 CYW43439 無線晶片、板載 LED 與 RP2350 內部溫度感測器即可完整執行！所有 Wi-Fi 連線設定直接寫在腳本頂部，開啟檔案填入帳密即可一鍵執行。
@@ -37,7 +39,21 @@ WIFI_PASSWORD = "您的Wi-Fi密碼"
 | **雙機配對** | [lab1_sender.py](file:///c:/Nono/Pico2%20W/lab1_sender.py)<br>[lab1_receiver.py](file:///c:/Nono/Pico2%20W/lab1_receiver.py) | **Pico 2 W 專屬傳送端與接收端** | MQTT 雙機配對互聯 (JSON) | 專為兩塊 Pico 2 W（或兩組學員）打造！傳送端定時將晶片溫度以 JSON 封包射出，發送時 LED 閃爍；接收端訂閱後即時解析，收到數據閃燈，溫度過熱自動狂閃示警！ |
 | **主題監聽** | [mqtt_subscriber_monitor.py](file:///c:/Nono/Pico2%20W/mqtt_subscriber_monitor.py) | **特定主題訊息監聽與通訊列顯示** | MQTT 訂閱監聽 (MicroPython) | 專為抓取 MQTTGO 特定主題所設計！只要雲端有新訊息發布，Pico 2 W 立刻在 Thonny 通訊列（Shell）格式化排版顯示，板載 LED 同步閃爍提示！ |
 | **主題發布** | [mqtt_publisher.py](file:///c:/Nono/Pico2%20W/mqtt_publisher.py) | **向特定主題發布訊息程式** | MQTT 訊息發布 (互動/自動) | 專為向 MQTTGO 特定主題發布訊息設計！支援在 Thonny 通訊列直接輸入任意文字/JSON 即時發送，亦可切換為定時自動感測發布！ |
+| **邊緣伺服器** | [lab2_web_server.py](file:///c:/Nono/Pico2%20W/lab2_web_server.py) | **Pico 2 W 邊緣微型 Web Server** | HTTP / RESTful API / AJAX | Pico 2 W 自主在 Port 80 架設 Web Server！手機或電腦瀏覽器輸入 Pico IP 即可開啟現代深色儀表板，即時監控晶片溫度與 Uptime，點擊按鈕無線遙控實體板載綠燈！ |
 | **實驗 2** | [lab2_gov_opendata.py](file:///c:/Nono/Pico2%20W/lab2_gov_opendata.py) | **台灣政府開放資料 API 串接** | HTTPS GET / RESTful / JSON 解析 | 串接 [data.gov.tw](https://data.gov.tw/) 政府開放資料平臺 (氣象署測站 API)。以 StationId 精準過濾取得 2KB 輕量 JSON，解析即時天氣與降雨，下雨自動觸發板載 LED 快閃警報！ |
+
+---
+
+### 🌐 邊緣微型 Web Server (lab2_web_server.py) 操作流程
+專為 1 小時實作設計，讓 Pico 2 W 搖身一變成為微型 Edge Server：
+1. **執行程式**：在 Thonny 執行 [`lab2_web_server.py`](file:///c:/Nono/Pico2%20W/lab2_web_server.py)。
+2. **開啟網頁**：連上 Wi-Fi 後，Shell 印出 `http://192.168.x.x`，用電腦或手機瀏覽器開啟該 IP 網址。
+3. **即時儀表板**：
+   - 瀏覽器呈現深色質感儀表板，顯示 RP2350 內部溫度與運行時間。
+   - 手指用力捏住 RP2350 晶片 10 秒，頁面透過 AJAX 每 2 秒自動刷新，親眼見證數值飆升！
+4. **雙向無線點燈**：
+   - 點擊網頁上的「💡 開燈 (ON)」、「💤 關燈 (OFF)」、「🔄 切換 (TOGGLE)」或「⚡ 快閃 3 次」，實體板載綠色 LED 即刻精準響應！
+5. **RESTful API 支援**：手動輸入 `http://192.168.x.x/api/status` 可直接取得純 JSON 格式設備狀態。
 
 ---
 
