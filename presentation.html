@@ -2094,54 +2094,35 @@ request_count = <span class="c-num">0</span>
                             <button class="copy-button" onclick="copyCode(this, 'code-radar')">一鍵複製雷達伺服器程式碼</button>
                         </div>
                     </div>
-                    <pre class="code-block" id="code-radar"># lab2_web_server.py - Pico 2 W 專屬邊緣微型 Web Server (Edge Web Server)
+                    <pre class="code-block" id="code-radar"># lab2_wifi_radar.py - Pico 2 W 邊緣 Web Server：Wi-Fi 訊號強度探測儀
 # 適用硬體：Raspberry Pi Pico 2 W (RP2350 + CYW43439)
 # 運作環境：Thonny IDE + MicroPython
-# 零外接零件：使用 RP2350 內部溫度感測器 (ADC 4) 與板載綠色 LED (&quot;LED&quot;)
-# 核心功能：Pico 2 W 自主在 Port 80 架設 HTTP Web 伺服器！
-#           手機與電腦只要在同一個 Wi-Fi 區域網路，輸入 Pico 的 IP 即可開啟現代化儀表板，
-#           即時讀取板載晶片溫度、監看系統狀態，並用網頁按鈕無線遙控實體板載 LED！
+# 零外接零件：使用板載 CYW43439 無線晶片與板載綠色 LED (&quot;LED&quot;)
+# 功能說明：
+#   1. 啟動 Web Server (Port 80)，瀏覽器輸入 Pico IP 即可查看周遭 Wi-Fi 訊號與強度清單。
+#   2. 同步在 Thonny 通訊列 (Shell) 格式化印出周遭 Wi-Fi 熱點名稱與 dBm 訊號強弱。
+#   3. 支援一鍵重新掃描，直觀觀察訊號強度與手掌物理遮蔽衰減！
 
 import time
 import network
-import machine
-from machine import Pin, ADC
+from machine import Pin
 import usocket as socket
-import ujson
 import gc
 
 # ==========================================
-# 1. Wi-Fi 連線設定 (請替換為您的 Wi-Fi)
+# 1. Wi-Fi 連線設定 (請填入您的 2.4GHz Wi-Fi)
 # ==========================================
-WIFI_SSID = &quot;YOUR_WIFI_SSID&quot;          # 請填入 2.4GHz Wi-Fi 名稱
+WIFI_SSID = &quot;YOUR_WIFI_SSID&quot;          # 請填入 Wi-Fi 名稱 (僅支援 2.4GHz)
 WIFI_PASSWORD = &quot;YOUR_WIFI_PASSWORD&quot;  # 請填入 Wi-Fi 密碼
 
 # ==========================================
-# 2. 硬體引腳與狀態初始化
+# 2. 硬體與網路初始化
 # ==========================================
-led = Pin(&quot;LED&quot;, Pin.OUT)       # 板載綠色 LED
-temp_sensor = ADC(4)            # RP2350 內部溫度感測器通道
-start_time = time.time()        # 開機計時起點
-request_count = 0               # 伺服器請求處理累計
-
-def read_temperature():
-    &quot;&quot;&quot;讀取 RP2350 內部溫度感測器 (攝氏 °C)&quot;&quot;&quot;
-    conversion_factor = 3.3 / 65535
-    reading = temp_sensor.read_u16() * conversion_factor
-    # RP2350 物理轉換公式：27 - (Vbe - 0.706) / 0.001721
-    return 27 - (reading - 0.706) / 0.001721
-
-def blink_led(times=3, duration=0.1):
-    &quot;&quot;&quot;板載 LED 快閃反饋&quot;&quot;&quot;
-    for _ in range(times):
-        led.on()
-        time.sleep(duration)
-        led.off()
-        time.sleep(duration)
+led = Pin(&quot;LED&quot;, Pin.OUT)       # 板載綠色 LED (掃描時閃爍反饋)
+wlan = network.WLAN(network.STA_IF)
 
 def connect_wifi():
     &quot;&quot;&quot;連線至 Wi-Fi 基地台&quot;&quot;&quot;
-    wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
         print(&quot;=&quot; * 65)
@@ -2155,323 +2136,295 @@ def connect_wifi():
             
     if wlan.isconnected():
         ip = wlan.ifconfig()[0]
-        print(f&quot;\n✅ [Wi-Fi] 連線成功！本機 IP: {ip}&quot;)
+        print(f&quot;\n✅ [Wi-Fi] 連線成功！Pico 2 W 本機 IP: {ip}&quot;)
         return ip
     else:
         print(&quot;\n❌ [錯誤] Wi-Fi 連線逾時！請確認帳密與 2.4GHz 頻段。&quot;)
         return None
 
-def build_html_page(ip):
-    &quot;&quot;&quot;產出響應式深色現代化 Web 儀表板 HTML&quot;&quot;&quot;
-    temp = read_temperature()
-    uptime = time.time() - start_time
-    mem_free = gc.mem_free()
-    led_state = &quot;ON&quot; if led.value() else &quot;OFF&quot;
+def rssi_to_quality(rssi):
+    &quot;&quot;&quot;將 dBm 訊號強度轉換為百分比 (0~100%)&quot;&quot;&quot;
+    if rssi &lt;= -100:
+        return 0
+    elif rssi &gt;= -50:
+        return 100
+    else:
+        return 2 * (rssi + 100)
+
+def rssi_to_level(rssi):
+    &quot;&quot;&quot;評估訊號等級與顯示顏色&quot;&quot;&quot;
+    if rssi &gt;= -60:
+        return &quot;極佳&quot;, &quot;#10b981&quot;   # 綠色
+    elif rssi &gt;= -70:
+        return &quot;良好&quot;, &quot;#38bdf8&quot;   # 藍色
+    elif rssi &gt;= -80:
+        return &quot;普通&quot;, &quot;#facc15&quot;   # 黃色
+    else:
+        return &quot;微弱&quot;, &quot;#f87171&quot;   # 紅色
+
+def scan_nearby_wifi():
+    &quot;&quot;&quot;掃描周遭 Wi-Fi 並在 Shell 印出結果&quot;&quot;&quot;
+    # 掃描時閃燈提示
+    led.on()
+    print(&quot;\n🔍 正在掃描周遭 Wi-Fi 訊號...&quot;)
+    try:
+        raw_list = wlan.scan()
+    except Exception as e:
+        print(f&quot;❌ 掃描失敗: {e}&quot;)
+        raw_list = []
+    led.off()
     
+    wifi_list = []
+    for item in raw_list:
+        # 格式: (ssid, bssid, channel, RSSI, authmode, hidden)
+        try:
+            ssid = item[0].decode(&quot;utf-8&quot;).strip()
+        except:
+            ssid = str(item[0])
+            
+        if not ssid:
+            ssid = &quot;[隱藏 SSID]&quot;
+            
+        rssi = item[3]
+        channel = item[2]
+        quality = rssi_to_quality(rssi)
+        level_str, level_color = rssi_to_level(rssi)
+        
+        wifi_list.append({
+            &quot;ssid&quot;: ssid,
+            &quot;channel&quot;: channel,
+            &quot;rssi&quot;: rssi,
+            &quot;quality&quot;: quality,
+            &quot;level&quot;: level_str,
+            &quot;color&quot;: level_color
+        })
+        
+    # 依照訊號強度 (RSSI 由大到小) 排序
+    wifi_list.sort(key=lambda x: x[&quot;rssi&quot;], reverse=True)
+    
+    # 在 Thonny Shell 終端機格式化輸出
+    print(&quot;-&quot; * 65)
+    print(f&quot;📊 掃描完成！共偵測到 {len(wifi_list)} 個 Wi-Fi 熱點 (由強至弱排序)：&quot;)
+    for i, ap in enumerate(wifi_list, 1):
+        bar_len = ap[&quot;quality&quot;] // 10
+        bar_str = &quot;█&quot; * bar_len + &quot;░&quot; * (10 - bar_len)
+        print(f&quot; {i:2d}. [{ap[&#x27;ssid&#x27;]:&lt;24}]  訊號: {ap[&#x27;rssi&#x27;]:3d} dBm  [{bar_str}] ({ap[&#x27;level&#x27;]})  CH:{ap[&#x27;channel&#x27;]}&quot;)
+    print(&quot;-&quot; * 65)
+    
+    gc.collect()
+    return wifi_list
+
+def build_html_page(wifi_list, ip):
+    &quot;&quot;&quot;產生查看 Wi-Fi 訊號與強度的簡潔網頁&quot;&quot;&quot;
+    # 動態產生熱點表格內容
+    rows = &quot;&quot;
+    for i, ap in enumerate(wifi_list, 1):
+        rows += f&quot;&quot;&quot;
+        &lt;tr&gt;
+            &lt;td style=&quot;color:#94a3b8;&quot;&gt;#{i}&lt;/td&gt;
+            &lt;td&gt;&lt;strong&gt;{ap[&#x27;ssid&#x27;]}&lt;/strong&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;span class=&quot;badge&quot; style=&quot;background:#1e293b; color:#94a3b8;&quot;&gt;CH {ap[&#x27;channel&#x27;]}&lt;/span&gt;&lt;/td&gt;
+            &lt;td style=&quot;color:{ap[&#x27;color&#x27;]}; font-weight:bold;&quot;&gt;{ap[&#x27;rssi&#x27;]} dBm&lt;/td&gt;
+            &lt;td style=&quot;width: 140px;&quot;&gt;
+                &lt;div class=&quot;progress-bg&quot;&gt;
+                    &lt;div class=&quot;progress-bar&quot; style=&quot;width:{ap[&#x27;quality&#x27;]}%; background:{ap[&#x27;color&#x27;]};&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/td&gt;
+            &lt;td&gt;&lt;span class=&quot;badge&quot; style=&quot;background:{ap[&#x27;color&#x27;]}22; color:{ap[&#x27;color&#x27;]}; border: 1px solid {ap[&#x27;color&#x27;]}44;&quot;&gt;{ap[&#x27;level&#x27;]} ({ap[&#x27;quality&#x27;]}%)&lt;/span&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &quot;&quot;&quot;
+        
+    if not rows:
+        rows = &quot;&lt;tr&gt;&lt;td colspan=&#x27;6&#x27; style=&#x27;text-align:center; padding:20px; color:#94a3b8;&#x27;&gt;未偵測到任何 Wi-Fi 熱點&lt;/td&gt;&lt;/tr&gt;&quot;
+
     html = f&quot;&quot;&quot;&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;zh-TW&quot;&gt;
 &lt;head&gt;
     &lt;meta charset=&quot;UTF-8&quot;&gt;
     &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-    &lt;title&gt;Pico 2 W 邊緣伺服器儀表板&lt;/title&gt;
+    &lt;title&gt;Pico 2 W - Wi-Fi 訊號強度探測儀&lt;/title&gt;
     &lt;style&gt;
-        :root {{
-            --bg: #090d16;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(148, 163, 184, 0.15);
-            --primary: #38bdf8;
-            --accent: #10b981;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-        }}
-        * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, sans-serif; }}
         body {{
-            background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 100%);
-            color: var(--text-main);
-            min-height: 100vh;
+            background: #0b0f19;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, sans-serif;
+            margin: 0;
             padding: 24px 16px;
             display: flex;
             justify-content: center;
-            align-items: center;
         }}
         .container {{
-            max-width: 480px;
+            max-width: 720px;
             width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 28px 24px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }}
-        .badge {{
-            display: inline-block;
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--primary);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 9999px;
-            padding: 4px 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }}
-        h1 {{ font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }}
-        .subtitle {{ color: var(--text-sub); font-size: 0.85rem; margin-bottom: 24px; }}
-        
-        /* 數據卡片區 */
-        .stats-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }}
-        .stat-card {{
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 14px;
+        .header {{
             text-align: center;
-        }}
-        .stat-label {{ font-size: 0.75rem; color: var(--text-sub); margin-bottom: 4px; }}
-        .stat-value {{ font-size: 1.4rem; font-weight: 900; color: var(--primary); }}
-        .stat-unit {{ font-size: 0.8rem; font-weight: 400; color: var(--text-sub); }}
-        
-        /* LED 狀態指示器 */
-        .led-indicator-box {{
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 14px 18px;
             margin-bottom: 24px;
         }}
-        .led-status-tag {{ font-weight: 800; font-size: 1.1rem; }}
-        .led-dot {{
-            width: 18px; height: 18px; border-radius: 50%;
-            background: {(&quot;#10b981&quot; if led_state == &quot;ON&quot; else &quot;#475569&quot;)};
-            box-shadow: {(&quot;0 0 12px #10b981&quot; if led_state == &quot;ON&quot; else &quot;none&quot;)};
-            transition: all 0.3s;
+        h1 {{
+            font-size: 1.5rem;
+            color: #38bdf8;
+            margin-bottom: 6px;
         }}
-        
-        /* 控制按鈕群 */
-        .btn-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }}
-        button, a.btn {{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 12px 16px;
+        .meta {{
+            color: #94a3b8;
+            font-size: 0.88rem;
+        }}
+        .card {{
+            background: #111827;
+            border: 1px solid #1f2937;
             border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            border: none;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }}
-        .btn-on {{ background: #10b981; color: #022c22; }}
-        .btn-on:hover {{ background: #34d399; transform: translateY(-2px); }}
-        .btn-off {{ background: #334155; color: #f8fafc; border: 1px solid #475569; }}
-        .btn-off:hover {{ background: #475569; transform: translateY(-2px); }}
-        .btn-toggle {{ background: #0284c7; color: #f0f9ff; }}
-        .btn-toggle:hover {{ background: #38bdf8; transform: translateY(-2px); }}
-        .btn-blink {{ background: #7c3aed; color: #f5f3ff; }}
-        .btn-blink:hover {{ background: #a855f7; transform: translateY(-2px); }}
-        
-        /* 即時輪詢動態小字 */
-        .auto-refresh-tip {{
-            font-size: 0.75rem;
-            color: #64748b;
-            text-align: center;
-            margin-top: 14px;
+        .toolbar {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }}
+        .btn {{
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }}
+        .btn:hover {{ background: #1d4ed8; }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }}
+        th, td {{
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #1e293b;
+        }}
+        th {{
+            color: #94a3b8;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+        }}
+        .progress-bg {{
+            background: #1e293b;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }}
+        .progress-bar {{
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }}
+        .badge {{
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            display: inline-block;
+        }}
+        .tip {{
+            margin-top: 18px;
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid #38bdf8;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            line-height: 1.5;
         }}
     &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
     &lt;div class=&quot;container&quot;&gt;
-        &lt;div class=&quot;badge&quot;&gt;RP2350 邊緣伺服器&lt;/div&gt;
-        &lt;h1&gt;Pico 2 W Web 儀表板&lt;/h1&gt;
-        &lt;div class=&quot;subtitle&quot;&gt;區網 IP: &lt;strong&gt;{ip}&lt;/strong&gt; | 獨立本地運作&lt;/div&gt;
-
-        &lt;!-- 數據監控 --&gt;
-        &lt;div class=&quot;stats-grid&quot;&gt;
-            &lt;div class=&quot;stat-card&quot;&gt;
-                &lt;div class=&quot;stat-label&quot;&gt;RP2350 晶片溫度&lt;/div&gt;
-                &lt;div class=&quot;stat-value&quot; id=&quot;temp-val&quot;&gt;{temp:.2f}&lt;span class=&quot;stat-unit&quot;&gt; °C&lt;/span&gt;&lt;/div&gt;
-            &lt;/div&gt;
-            &lt;div class=&quot;stat-card&quot;&gt;
-                &lt;div class=&quot;stat-label&quot;&gt;運行時間 (Uptime)&lt;/div&gt;
-                &lt;div class=&quot;stat-value&quot; id=&quot;uptime-val&quot;&gt;{uptime}&lt;span class=&quot;stat-unit&quot;&gt; 秒&lt;/span&gt;&lt;/div&gt;
-            &lt;/div&gt;
+        &lt;div class=&quot;header&quot;&gt;
+            &lt;h1&gt;📡 Pico 2 W - Wi-Fi 訊號強度探測儀&lt;/h1&gt;
+            &lt;div class=&quot;meta&quot;&gt;Pico 本機 IP: &lt;strong&gt;{ip}&lt;/strong&gt; | 零外接零件 (板載 CYW43439 晶片)&lt;/div&gt;
         &lt;/div&gt;
-
-        &lt;!-- 板載 LED 狀態 --&gt;
-        &lt;div class=&quot;led-indicator-box&quot;&gt;
-            &lt;div&gt;
-                &lt;div style=&quot;font-size: 0.8rem; color: var(--text-sub);&quot;&gt;板載綠色 LED&lt;/div&gt;
-                &lt;div class=&quot;led-status-tag&quot; id=&quot;led-text&quot; style=&quot;color: {(&quot;#34d399&quot; if led_state == &quot;ON&quot; else &quot;#94a3b8&quot;)};&quot;&gt;{led_state}&lt;/div&gt;
+        
+        &lt;div class=&quot;card&quot;&gt;
+            &lt;div class=&quot;toolbar&quot;&gt;
+                &lt;span style=&quot;font-weight: bold; color: #f8fafc;&quot;&gt;周遭 Wi-Fi 訊號清單 (共 {len(wifi_list)} 個)&lt;/span&gt;
+                &lt;a href=&quot;/&quot; class=&quot;btn&quot;&gt;🔄 重新掃描訊號&lt;/a&gt;
             &lt;/div&gt;
-            &lt;div class=&quot;led-dot&quot; id=&quot;led-dot&quot;&gt;&lt;/div&gt;
-        &lt;/div&gt;
+            
+            &lt;div style=&quot;overflow-x: auto;&quot;&gt;
+                &lt;table&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;#&lt;/th&gt;
+                            &lt;th&gt;Wi-Fi 名稱 (SSID)&lt;/th&gt;
+                            &lt;th&gt;頻道&lt;/th&gt;
+                            &lt;th&gt;訊號強度&lt;/th&gt;
+                            &lt;th&gt;強度指標&lt;/th&gt;
+                            &lt;th&gt;等級 (品質)&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        {rows}
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
 
-        &lt;!-- 實體遙控按鈕群 --&gt;
-        &lt;div class=&quot;btn-grid&quot;&gt;
-            &lt;a href=&quot;/api/led?state=on&quot; class=&quot;btn btn-on&quot;&gt;💡 開燈 (ON)&lt;/a&gt;
-            &lt;a href=&quot;/api/led?state=off&quot; class=&quot;btn btn-off&quot;&gt;💤 關燈 (OFF)&lt;/a&gt;
-            &lt;a href=&quot;/api/led?state=toggle&quot; class=&quot;btn btn-toggle&quot;&gt;🔄 切換 (TOGGLE)&lt;/a&gt;
-            &lt;a href=&quot;/api/led?state=blink&quot; class=&quot;btn btn-blink&quot;&gt;⚡ 快閃 3 次&lt;/a&gt;
-        &lt;/div&gt;
-
-        &lt;div class=&quot;auto-refresh-tip&quot;&gt;
-            ⚡ 頁面內建 AJAX 非阻塞非同步輪詢，每 2 秒無感刷新溫度數據
+            &lt;div class=&quot;tip&quot;&gt;
+                💡 &lt;strong&gt;物理實證挑戰&lt;/strong&gt;：用手掌用力捏住 Pico 2 W 金屬天線罩，點擊「🔄 重新掃描訊號」，觀察上方 dBm 數值是否明顯下降 15 ~ 25 dBm！
+            &lt;/div&gt;
         &lt;/div&gt;
     &lt;/div&gt;
-
-    &lt;script&gt;
-        // 每 2 秒透過 RESTful API 拉取最新狀態，實現無重新整理動態更新
-        setInterval(() =&gt; {{
-            fetch(&#x27;/api/status&#x27;)
-                .then(r =&gt; r.json())
-                .then(data =&gt; {{
-                    document.getElementById(&#x27;temp-val&#x27;).innerHTML = data.temp.toFixed(2) + &#x27;&lt;span class=&quot;stat-unit&quot;&gt; °C&lt;/span&gt;&#x27;;
-                    document.getElementById(&#x27;uptime-val&#x27;).innerHTML = data.uptime + &#x27;&lt;span class=&quot;stat-unit&quot;&gt; 秒&lt;/span&gt;&#x27;;
-                    const isLedOn = data.led === 1;
-                    document.getElementById(&#x27;led-text&#x27;).innerText = isLedOn ? &quot;ON&quot; : &quot;OFF&quot;;
-                    document.getElementById(&#x27;led-text&#x27;).style.color = isLedOn ? &quot;#34d399&quot; : &quot;#94a3b8&quot;;
-                    document.getElementById(&#x27;led-dot&#x27;).style.background = isLedOn ? &quot;#10b981&quot; : &quot;#475569&quot;;
-                    document.getElementById(&#x27;led-dot&#x27;).style.boxShadow = isLedOn ? &quot;0 0 12px #10b981&quot; : &quot;none&quot;;
-                }})
-                .catch(err =&gt; console.log(&#x27;輪詢暫時中斷:&#x27;, err));
-        }}, 2000);
-    &lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;&quot;&quot;&quot;
+&lt;/html&gt;
+&quot;&quot;&quot;
     return html
 
-def parse_http_request(raw_request):
-    &quot;&quot;&quot;解析 HTTP 請求方法與路由路徑&quot;&quot;&quot;
-    try:
-        lines = raw_request.split(&quot;\r\n&quot;)
-        if not lines or not lines[0]:
-            return &quot;GET&quot;, &quot;/&quot;
-        first_line = lines[0].split(&quot; &quot;)
-        method = first_line[0]
-        path = first_line[1] if len(first_line) &gt; 1 else &quot;/&quot;
-        return method, path
-    except Exception:
-        return &quot;GET&quot;, &quot;/&quot;
-
 def main():
-    global request_count
-    print(&quot;\n&quot; + &quot;=&quot; * 65)
-    print(&quot;🌐 實驗 2：Pico 2 W 邊緣微型 Web Server (Edge Web Server)&quot;)
-    print(&quot;=&quot; * 65)
-    
+    # 1. 連線 Wi-Fi
     ip = connect_wifi()
     if not ip:
         return
         
-    # 建立 TCP Socket 伺服器並綁定 Port 80
+    # 2. 建立 Web Server
     server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_sock.bind((&quot;0.0.0.0&quot;, 80))
-    server_sock.listen(5)
+    server_sock.listen(3)
     
-    print(&quot;\n&quot; + &quot;╔&quot; + &quot;═&quot; * 63 + &quot;╗&quot;)
-    print(&quot;║ 🎉 【Pico 2 W 邊緣 Web 伺服器啟動成功！】&quot;)
-    print(&quot;╠&quot; + &quot;═&quot; * 63 + &quot;╣&quot;)
-    print(f&quot;║ 🔗 請打開電腦或手機瀏覽器輸入：&quot;)
-    print(f&quot;║    http://{ip}&quot;)
-    print(&quot;║&quot;)
-    print(&quot;║ 💡 提示：本實驗 Pico 扮演 Web Server，您可以在瀏覽器直接輸入 IP！&quot;)
-    print(&quot;║    支援點擊按鈕遙控 LED、手指按壓晶片實時升溫儀表板。&quot;)
-    print(&quot;╚&quot; + &quot;═&quot; * 63 + &quot;╝\n&quot;)
-    print(&quot;⏳ 伺服器監聽中 (等待 HTTP Request 連線)...\n&quot;)
-    
-    try:
-        while True:
-            client_sock, client_addr = server_sock.accept()
-            request_count += 1
-            client_ip = client_addr[0]
-            
-            # 讀取客戶端傳入之 HTTP 請求字串
-            raw_req = client_sock.recv(1024).decode(&quot;utf-8&quot;, &quot;ignore&quot;)
-            method, path = parse_http_request(raw_req)
-            
-            # 在 Thonny 通訊列輸出訪問日誌
-            print(f&quot;📥 [HTTP 請求 #{request_count:04d}] 來源: {client_ip} | {method} {path}&quot;)
-            
-            # 路由 1：RESTful API 狀態端點 (/api/status)
-            if path == &quot;/api/status&quot;:
-                temp = read_temperature()
-                uptime = time.time() - start_time
-                payload = {
-                    &quot;temp&quot;: round(temp, 2),
-                    &quot;led&quot;: led.value(),
-                    &quot;uptime&quot;: uptime,
-                    &quot;mem_free&quot;: gc.mem_free()
-                }
-                body = ujson.dumps(payload)
-                response = (
-                    &quot;HTTP/1.1 200 OK\r\n&quot;
-                    &quot;Content-Type: application/json; charset=utf-8\r\n&quot;
-                    &quot;Access-Control-Allow-Origin: *\r\n&quot;
-                    f&quot;Content-Length: {len(body)}\r\n&quot;
-                    &quot;Connection: close\r\n\r\n&quot;
-                    f&quot;{body}&quot;
-                )
-                client_sock.sendall(response.encode(&quot;utf-8&quot;))
-                
-            # 路由 2：LED 控制端點 (/api/led?state=...)
-            elif path.startswith(&quot;/api/led&quot;):
-                if &quot;state=on&quot; in path:
-                    led.on()
-                    print(&quot;   💡 板載 LED 已開啟 (ON)&quot;)
-                elif &quot;state=off&quot; in path:
-                    led.off()
-                    print(&quot;   💤 板載 LED 已關閉 (OFF)&quot;)
-                elif &quot;state=toggle&quot; in path:
-                    led.toggle()
-                    print(&quot;   🔄 板載 LED 狀態已切換&quot;)
-                elif &quot;state=blink&quot; in path:
-                    print(&quot;   ⚡ 執行快閃 3 次&quot;)
-                    blink_led(3, 0.12)
-                    
-                # 重新導向回首頁，無縫刷新畫面
-                redirect = (
-                    &quot;HTTP/1.1 303 See Other\r\n&quot;
-                    &quot;Location: /\r\n&quot;
-                    &quot;Connection: close\r\n\r\n&quot;
-                )
-                client_sock.sendall(redirect.encode(&quot;utf-8&quot;))
-                
-            # 路由 3：根目錄首頁儀表板 (/)
-            else:
-                html_body = build_html_page(ip)
-                response = (
-                    &quot;HTTP/1.1 200 OK\r\n&quot;
-                    &quot;Content-Type: text/html; charset=utf-8\r\n&quot;
-                    f&quot;Content-Length: {len(html_body.encode(&#x27;utf-8&#x27;))}\r\n&quot;
-                    &quot;Connection: close\r\n\r\n&quot;
-                    f&quot;{html_body}&quot;
-                )
-                client_sock.sendall(response.encode(&quot;utf-8&quot;))
-                
-            # 關閉客戶端 Socket 連線並主動回收記憶體
-            client_sock.close()
-            gc.collect()
-            
-    except KeyboardInterrupt:
-        print(&quot;\n🛑 使用者手動中斷伺服器。&quot;)
-    except Exception as e:
-        print(f&quot;\n❌ 伺服器異常: {e}&quot;)
-    finally:
+    print(&quot;\n&quot; + &quot;=&quot; * 65)
+    print(&quot;🚀 【Wi-Fi 訊號強度探測儀已啟動！】&quot;)
+    print(f&quot;👉 請在電腦或手機瀏覽器輸入： http://{ip}&quot;)
+    print(&quot;=&quot; * 65)
+
+    # 3. 初始掃描一次
+    current_wifi_list = scan_nearby_wifi()
+
+    while True:
         try:
-            server_sock.close()
-            print(&quot;Web Server 已正常關閉。&quot;)
-        except:
-            pass
+            client_sock, client_addr = server_sock.accept()
+            req_raw = client_sock.recv(512).decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+            
+            # 每次瀏覽器開啟或點擊重新整理，即時重新掃描周遭 Wi-Fi
+            current_wifi_list = scan_nearby_wifi()
+            
+            # 回傳 HTML 網頁
+            html_content = build_html_page(current_wifi_list, ip)
+            response = &quot;HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n&quot; + html_content
+            client_sock.sendall(response.encode(&quot;utf-8&quot;))
+            client_sock.close()
+            
+        except Exception as e:
+            print(f&quot;連線處理異常: {e}&quot;)
+            
+        gc.collect()
 
 if __name__ == &quot;__main__&quot;:
     main()
-
 </pre>
                 </div>
             </section>
