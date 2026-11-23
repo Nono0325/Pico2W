@@ -176,3 +176,4 @@
 2. **在 Thonny 執行顯示 `OSError: [Errno 98] EADDRINUSE`**：
    * 原因：前一次執行的 Socket 未完全關閉，Port 80 被佔用。
    * 救急解法：在 Thonny 按下紅色「Stop/Restart backend」按鈕軟重啟 Pico，或拔插 USB 重新執行即可。
+
