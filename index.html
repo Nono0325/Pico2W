@@ -681,8 +681,8 @@
                 <li><a href="#lab1-mqtt">📡 【實作】實驗 1：MQTTGO 雙向通訊</a></li>
                 <li><a href="#lab1-tester">🎮 虛擬 Pico 2 W 互動模擬器</a></li>
                 <li><a href="#lab1-pair">👥 【雙機】Pico 2 W 專屬傳送與接收</a></li>
-                <li><a href="#webserver-1hr-plan">⏱️ 【教案】邊緣Web Server 1小時規劃</a></li>
-                <li><a href="#lab2-webserver">🌐 【實作】邊緣微型 Web Server</a></li>
+                <li><a href="#webserver-1hr-plan">⏱️ 【教案】Wi-Fi雷達 Web Server 1小時</a></li>
+                <li><a href="#lab2-webserver">📡 【實作】Wi-Fi 空間雷達探測儀</a></li>
                 <li><a href="#opendata-theory">📘 【理論】政府開放資料與 REST API</a></li>
                 <li><a href="#lab2-opendata">🏛️ 【實作】實驗 2：台灣開放資料 API</a></li>
                 <li><a href="#station-selector">🗺️ 測站查詢與 Live API 測試</a></li>
@@ -1639,21 +1639,21 @@ recv_count = <span class="c-num">0</span>
                 </div>
             </section>
 
-            <!-- 教案規劃：邊緣微型 Web Server 1 小時極速實作教案 -->
+            <!-- 教案規劃：邊緣微型 Web Server 1 小時極速實作教案 (方案 10：Wi-Fi 空間雷達探測儀) -->
             <section class="module-section" id="webserver-1hr-plan">
                 <div class="section-header">
                     <span class="section-icon">⏱️</span>
-                    <h2 class="section-title">【實作教案】Pico 2 W 邊緣微型 Web Server：1 小時極速實作教案</h2>
+                    <h2 class="section-title">【實作教案】Pico 2 W 邊緣 Web Server：1 小時「Wi-Fi 空間雷達探測儀」極速實作 (方案 10)</h2>
                 </div>
                 <p class="section-desc">
-                    <strong>以實作為核心（動手率 &gt; 90%）</strong>。讓微控制器從物聯網客戶端徹底變身為真正的「邊緣伺服器 (Edge Server)」！
-                    利用板載 RP2350 內部溫度 (ADC 4) 與板載綠色 LED，<strong>零外接零件、直接在電腦或手機瀏覽器輸入 Pico IP</strong>，即可享受現代深色質感儀表板、即時手指物理升溫實證，並以網頁按鈕無線遙控實體板載硬體！
+                    <strong>以實作為核心（動手率 &gt; 90%）</strong>。讓微控制器從物聯網客戶端變身為真正的「邊緣伺服器 (Edge Server)」！
+                    直接調用板載 <strong>CYW43439 射頻晶片底層掃描能力 (<code>wlan.scan()</code>)</strong>，<strong>零外接零件</strong>，手機或電腦瀏覽器輸入 Pico IP，即可開啟高科技科幻旋轉雷達盤，親眼透視四周空氣中所有 Wi-Fi 訊號強弱 (RSSI/dBm)、頻道佔用分佈與最佳推薦！
                 </p>
 
                 <div class="callout-box" style="margin-top: 10px; margin-bottom: 24px;">
                     <strong>💡 核心觀念前後呼應與反轉突破</strong>：
                     <br>• <strong>上週 MQTT 課程</strong>：Pico 是 <strong>Client (客戶端)</strong>，主動向雲端發送，Port 80 關閉，故在瀏覽器開啟 192.168.x.x 會顯示拒絕連線。
-                    <br>• <strong>本週 Web Server 課程</strong>：Pico 在 Port 80 監聽，化身為 <strong>Edge Server (微型邊緣伺服器)</strong>！全班只要在手機或電腦瀏覽器輸入 <code>http://192.168.x.x</code>，由 Pico 2 W 親自送出 HTML 網頁！對應完整教學手冊請見 <a href="LESSON_PLAN_WEBSERVER_1HR.md" target="_blank" style="color: var(--primary);"><code>LESSON_PLAN_WEBSERVER_1HR.md</code></a>。
+                    <br>• <strong>本週 Web Server 課程</strong>：Pico 在 Port 80 監聽，化身為 <strong>Edge Server (微型邊緣伺服器)</strong>！全班只要在手機或電腦瀏覽器輸入 <code>http://192.168.x.x</code>，由 Pico 2 W 親自送出高科技旋轉雷達盤網頁，並以 RESTful JSON API 提供即時熱點探測數據！對應完整教學手冊請見 <a href="LESSON_PLAN_WEBSERVER_1HR.md" target="_blank" style="color: var(--primary);"><code>LESSON_PLAN_WEBSERVER_1HR.md</code></a>。
                 </div>
 
                 <!-- 課程時間與配比 -->
@@ -1671,38 +1671,38 @@ recv_count = <span class="c-num">0</span>
                             <tr>
                                 <td><span class="badge badge-cyan">00 - 05 min</span></td>
                                 <td><strong>任務 0：閃電啟動</strong></td>
-                                <td>填入 Wi-Fi 帳密、F5 啟動 Web 伺服器</td>
-                                <td>瀏覽器輸入 <code>http://192.168.x.x</code> 看到第一張網頁</td>
+                                <td>填 Wi-Fi 帳密、F5 啟動 Web 伺服器</td>
+                                <td>瀏覽器輸入 <code>http://192.168.x.x</code> 看到科幻旋轉雷達盤</td>
                             </tr>
                             <tr>
                                 <td><span class="badge badge-green">05 - 18 min</span></td>
-                                <td><strong>實作 1：邊緣儀表板</strong></td>
-                                <td>讀取內部溫度、手指按壓晶片物理升溫實證</td>
-                                <td>網頁刷新見溫升 5°C；<strong>動手改碼修改網頁外觀</strong></td>
+                                <td><strong>實作 1：空間雷達初探</strong></td>
+                                <td>調用 CYW43439 掃描周遭熱點、手掌物理遮蔽衰減</td>
+                                <td>探測四周 Wi-Fi 與 dBm；<strong>動手改碼調整雷達外觀與主題色</strong></td>
                             </tr>
                             <tr>
                                 <td><span class="badge badge-purple">18 - 32 min</span></td>
-                                <td><strong>實作 2：邊緣雙向控制</strong></td>
-                                <td>網頁按鈕無線遙控板載實體綠色 LED</td>
-                                <td>點擊 ON/OFF/TOGGLE 即刻點燈；<strong>動手改碼新增按鈕</strong></td>
+                                <td><strong>實作 2：頻譜擁擠度分析</strong></td>
+                                <td>2.4GHz 頻道分析 (1/6/11) 與演算法推薦</td>
+                                <td>找出最壅塞與最順暢頻道；<strong>動手改碼自訂擁擠警報門檻</strong></td>
                             </tr>
                             <tr>
                                 <td><span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">32 - 46 min</span></td>
-                                <td><strong>實作 3：現代無重整 API</strong></td>
-                                <td>剖析 <code>/api/status</code> 與 AJAX 非同步輪詢</td>
-                                <td>觀察每 2 秒平滑自動刷新；<strong>動手改碼擴充 JSON 欄位</strong></td>
+                                <td><strong>實作 3：RESTful API 串接</strong></td>
+                                <td>剖析 <code>/api/scan</code> JSON 結構與 AJAX 動態更新</td>
+                                <td>手機直接打開 API 端點看 JSON；<strong>動手改碼擴充手機熱點標籤</strong></td>
                             </tr>
                             <tr>
                                 <td><span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border-color: rgba(236, 72, 153, 0.4);">46 - 56 min</span></td>
-                                <td><strong>實作 4：全班區網互連</strong></td>
-                                <td>手機跨桌連線、隔空遙控同學板子</td>
-                                <td>左右同學互開手機瀏覽器，跨桌控制對方的實體 LED</td>
+                                <td><strong>實作 4：全班信號大尋寶</strong></td>
+                                <td>尋找教室隱藏熱點遊戲 (Signal Hunting)</td>
+                                <td>移動位置比拚 dBm 強度，最快定位出隱藏熱點發射源</td>
                             </tr>
                             <tr>
                                 <td><span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border-color: rgba(239, 68, 68, 0.4);">56 - 60 min</span></td>
                                 <td><strong>實作 5：架構對比總結</strong></td>
-                                <td>MQTT vs Web Server 核心差異歸納</td>
-                                <td>完成實作檢核表打勾；建立正確 Client vs Server 認知</td>
+                                <td>MQTT Client vs Edge Web Server 核心差異歸納</td>
+                                <td>完成實作檢核表打勾；建立微控制器邊緣運算核心認知</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1710,7 +1710,7 @@ recv_count = <span class="c-num">0</span>
 
                 <!-- 階梯式 4 大實戰關卡引導與動手改碼 -->
                 <div class="card" style="margin-bottom: 24px;">
-                    <h3>🛠️ 階梯式實作任務引導與學生動手改碼指南</h3>
+                    <h3>🛠️ 階梯式實作任務引導與學生動手改碼指南 (方案 10)</h3>
                     
                     <div class="step-list">
                         <!-- 任務 0 -->
@@ -1722,9 +1722,9 @@ recv_count = <span class="c-num">0</span>
                                     <span class="badge badge-cyan">3 分鐘動手</span>
                                 </div>
                                 <p style="font-size: 0.92rem; color: #cbd5e1;">
-                                    1. 打開 <code>lab2_web_server.py</code>，修改第 19、20 行的 Wi-Fi 帳密。<br>
+                                    1. 打開 <code>lab2_web_server.py</code>，修改第 23、24 行的 Wi-Fi 帳密（僅支援 2.4GHz）。<br>
                                     2. 按下 <strong>F5</strong> 執行，觀察 Shell 印出本機 IP（如 <code>192.168.50.3</code>）。<br>
-                                    3. 打開 Chrome 或 Edge 瀏覽器，在網址列直接輸入 <code>http://192.168.50.3</code>，秒速開啟現代深色儀表板！
+                                    3. 打開 Chrome 或 Edge 瀏覽器，網址列輸入 <code>http://192.168.50.3</code>，秒速開啟科幻旋轉雷達儀表板！
                                 </p>
                             </div>
                         </div>
@@ -1734,16 +1734,16 @@ recv_count = <span class="c-num">0</span>
                             <div class="step-num">1</div>
                             <div class="step-content" style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                                    <h4 style="margin: 0; color: #34d399;">【05 - 18 min】實作 1：邊緣儀表板 ── 晶片內部溫度與手指加熱物理實證</h4>
+                                    <h4 style="margin: 0; color: #34d399;">【05 - 18 min】實作 1：空間雷達初探 ── 射頻掃描與手掌遮蔽物理實證</h4>
                                     <span class="badge badge-green">13 分鐘實作</span>
                                 </div>
                                 <p style="font-size: 0.92rem; color: #cbd5e1;">
-                                    1. 觀察網頁上的「RP2350 晶片溫度」與「運行時間 (Uptime)」。<br>
-                                    2. <strong>物理體驗</strong>：請學生<strong>用食指用力按住 RP2350 黑色主晶片 10 秒鐘</strong>，重新整理網頁，親眼見證溫度從 28°C 飆升至 33°C！
+                                    1. 點擊網頁「📡 立即掃描空間雷達」，觀察 Pico 2 W 板載綠色 LED 快速脈衝閃爍兩下，雷達波掃描全場！<br>
+                                    2. <strong>物理體驗</strong>：請學生<strong>用手掌緊緊包覆住 Pico 2 W 天線端（金屬屏蔽罩上方）</strong>再次點擊掃描，親眼見證目標熱點訊號暴跌 15 ~ 25 dBm！體會人體水分對 2.4GHz 電磁波的真實衰減。
                                 </p>
                                 <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #34d399; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
-                                    <strong style="color: #34d399;">🛠️ 學生動手改碼挑戰 A：個人化儀表板與 CSS 主題色</strong>
-                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 0 0;">找到 <code>build_html_page</code> 函式內的 <code>&lt;h1&gt;</code> 標題改為自己的學號姓名，並將 <code>--primary: #38bdf8;</code> 改為橘黃色 <code>#f59e0b</code> 或紫粉色 <code>#ec4899</code>，存檔按 F5 刷新！</p>
+                                    <strong style="color: #34d399;">🛠️ 學生動手改碼挑戰 A：個人化雷達外觀與 CSS 主題色</strong>
+                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 0 0;">找到 <code>build_dashboard_html</code> 內的 CSS 變數，將 <code>--radar-green: #10b981;</code> 改為霓虹賽博朋克粉 <code>#ec4899</code> 或警告亮橘 <code>#f59e0b</code>，自訂個人專屬雷達介面！</p>
                                 </div>
                             </div>
                         </div>
@@ -1753,22 +1753,20 @@ recv_count = <span class="c-num">0</span>
                             <div class="step-num">2</div>
                             <div class="step-content" style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                                    <h4 style="margin: 0; color: #c084fc;">【18 - 32 min】實作 2：邊緣雙向控制 ── 手機/網頁按鈕無線遙控實體板載綠燈</h4>
+                                    <h4 style="margin: 0; color: #c084fc;">【18 - 32 min】實作 2：頻譜擁擠度分析 ── 2.4GHz 互不干擾頻道演算法</h4>
                                     <span class="badge badge-purple">14 分鐘實作</span>
                                 </div>
                                 <p style="font-size: 0.92rem; color: #cbd5e1;">
-                                    1. 在網頁點擊「💡 開燈 (ON)」、「💤 關燈 (OFF)」或「🔄 切換」，實體板載綠色 LED 瞬間亮起與熄滅！<br>
-                                    2. 觀察 Thonny Shell 終端機即時印出 HTTP GET 請求日誌。
+                                    1. 觀察儀表板下方的「2.4GHz 頻譜頻道分佈長條圖」，微控制器即時統計了全場 Channel 1 ~ 13 的 AP 分佈。<br>
+                                    2. 演算法評估三大互不干擾核心頻段（CH 1 / 6 / 11），並給出最佳連線頻道推薦！
                                 </p>
                                 <div style="background: rgba(168, 85, 247, 0.08); border-left: 3px solid #c084fc; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
-                                    <strong style="color: #c084fc;">🛠️ 學生動手改碼挑戰 B：擴充「🚨 SOS 摩斯密碼警報」按鈕</strong>
-                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 6px 0;">在按鈕群新增按鈕，並在路由加入三短三長三短閃爍邏輯：</p>
-                                    <pre class="code-block" style="margin: 0;"><span class="c-com"># lab2_web_server.py (在 path.startswith("/api/led") 擴充)</span>
-<span class="c-key">elif</span> <span class="c-str">"state=sos"</span> <span class="c-key">in</span> path:
-    print(<span class="c-str">"🚨 觸發 SOS 警報！"</span>)
-    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.1</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)
-    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.3</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)
-    <span class="c-key">for</span> _ <span class="c-key">in</span> range(<span class="c-num">3</span>): led.on(); time.sleep(<span class="c-num">0.1</span>); led.off(); time.sleep(<span class="c-num">0.1</span>)</pre>
+                                    <strong style="color: #c084fc;">🛠️ 學生動手改碼挑戰 B：自訂頻道擁擠警報門檻 (Crowded Threshold)</strong>
+                                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 4px 0 6px 0;">修改 <code>perform_wifi_radar_scan()</code>，當任一頻道 AP 數量大於 3 個時，自動標註為 <code>🚨 嚴重擁塞</code>：</p>
+                                    <pre class="code-block" style="margin: 0;"><span class="c-com"># lab2_web_server.py (在 perform_wifi_radar_scan 演算法擴充)</span>
+<span class="c-key">for</span> ch, count <span class="c-key">in</span> channel_counts.items():
+    <span class="c-key">if</span> count &gt;= <span class="c-num">3</span>:
+        print(f<span class="c-str">"⚠️ 警告: 頻道 CH {ch} 已有 {count} 個熱點，高度壅塞！"</span>)</pre>
                                 </div>
                             </div>
                         </div>
@@ -1778,21 +1776,21 @@ recv_count = <span class="c-num">0</span>
                             <div class="step-num">3</div>
                             <div class="step-content" style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                                    <h4 style="margin: 0; color: #facc15;">【32 - 46 min】實作 3：現代無重整體驗 ── RESTful JSON API 與 AJAX 動態輪詢</h4>
+                                    <h4 style="margin: 0; color: #facc15;">【32 - 46 min】實作 3：RESTful API 串接 ── 純 JSON 輸出與 AJAX 動態更新</h4>
                                     <span class="badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15; border-color: rgba(234, 179, 8, 0.4);">14 分鐘實作</span>
                                 </div>
                                 <p style="font-size: 0.92rem; color: #cbd5e1;">
-                                    1. 手動在瀏覽器開啟 <code>http://192.168.x.x/api/status</code>，看見微控制器輸出的純 JSON 數據。<br>
-                                    2. 回到首頁，雙手放開鍵盤，頁面透過內嵌 JavaScript <code>fetch()</code> 每 2 秒無感自動刷新數據，免手動按 F5！
+                                    1. 手動在瀏覽器開啟 <code>http://192.168.x.x/api/scan</code>，看見微控制器輸出的純 JSON 陣列。<br>
+                                    2. 儀表板勾選「⚡ 自動動態掃描 (每 5 秒)」，前端 JavaScript 自動向該 API 輪詢，雷達盤與訊號表即時動態滾動！
                                 </p>
                                 <div style="background: rgba(234, 179, 8, 0.08); border-left: 3px solid #facc15; padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 10px 0;">
-                                    <strong style="color: #facc15;">🛠️ 學生動手改碼挑戰 C：擴充 JSON 警報標籤</strong>
-                                    <pre class="code-block" style="margin: 6px 0 0 0;"><span class="c-com"># lab2_web_server.py (在 /api/status 路由字典加入)</span>
-payload = {
-    <span class="c-str">"temp"</span>: round(temp, <span class="c-num">2</span>),
-    <span class="c-str">"led"</span>: led.value(),
-    <span class="c-str">"uptime"</span>: uptime,
-    <span class="c-str">"alert"</span>: <span class="c-str">"OVERHEAT"</span> <span class="c-key">if</span> temp &gt; <span class="c-num">30.0</span> <span class="c-key">else</span> <span class="c-str">"NORMAL"</span>
+                                    <strong style="color: #facc15;">🛠️ 學生動手改碼挑戰 C：擴充手機熱點 (Hotspot) 標籤識別</strong>
+                                    <pre class="code-block" style="margin: 6px 0 0 0;"><span class="c-com"># lab2_web_server.py (在解析 AP 名稱時擴充)</span>
+is_hotspot = <span class="c-str">"iPhone"</span> <span class="c-key">in</span> ssid_str <span class="c-key">or</span> <span class="c-str">"Galaxy"</span> <span class="c-key">in</span> ssid_str <span class="c-key">or</span> <span class="c-str">"Pixel"</span> <span class="c-key">in</span> ssid_str
+ap_item = {
+    <span class="c-str">"ssid"</span>: ssid_str + (<span class="c-str">" 📱[個人熱點]"</span> <span class="c-key">if</span> is_hotspot <span class="c-key">else</span> <span class="c-str">""</span>),
+    <span class="c-str">"channel"</span>: channel,
+    <span class="c-str">"rssi"</span>: rssi
 }</pre>
                                 </div>
                             </div>
@@ -1803,12 +1801,12 @@ payload = {
                             <div class="step-num">4</div>
                             <div class="step-content" style="flex: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                                    <h4 style="margin: 0; color: #f472b6;">【46 - 56 min】實作 4：全班區網互連 ── 手機跨桌連線與邊緣伺服器大尋寶</h4>
+                                    <h4 style="margin: 0; color: #f472b6;">【46 - 56 min】實作 4：全班信號大尋寶 ── 隱藏熱點尋寶遊戲 (Signal Hunting)</h4>
                                     <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6; border-color: rgba(236, 72, 153, 0.4);">10 分鐘競賽</span>
                                 </div>
                                 <p style="font-size: 0.92rem; color: #cbd5e1;">
-                                    <strong>玩法 1：手機無線遙控</strong>：手機連上教室同一 Wi-Fi，打開 Safari/Chrome 輸入自己 Pico 的 IP，在教室任一角落走動皆可點燈！<br>
-                                    <strong>玩法 2：隔空點燈大尋寶</strong>：左右兩位同學互報 IP，同學 A 用手機開啟同學 B 的儀表板，隔空幫同學 B 點燈，體會真正的 Edge Computing 魅力！
+                                    <strong>遊戲規則</strong>：老師用手機開啟名為 <code>TREASURE_BOX</code> 的隱藏熱點並藏在教室某角落。<br>
+                                    全體學生拿著筆電或手機觀察 Pico 2 W 雷達回傳的 RSSI 數值（例如從 -85 dBm 逐漸增強至 -35 dBm），最快說出熱點藏匿位置的同學獲勝！
                                 </p>
                             </div>
                         </div>
@@ -1830,23 +1828,27 @@ payload = {
                                 <tbody>
                                     <tr>
                                         <td><strong>Web Server 啟動</strong></td>
-                                        <td>成功在 Port 80 監聽，瀏覽器輸入 IP 能順利開啟深色儀表板</td>
+                                        <td>成功在 Port 80 監聽，瀏覽器輸入 IP 能順利開啟科幻旋轉雷達盤</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>物理升溫實證</strong></td>
-                                        <td>手指捏緊 RP2350 晶片 10 秒後，網頁數值明確跳升 5°C</td>
+                                        <td><strong>空間雷達掃描</strong></td>
+                                        <td>點擊「立即掃描」，列出四周所有 AP 名稱、dBm 與加密模式</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>網頁雙向遙控</strong></td>
-                                        <td>點擊網頁 ON / OFF 按鈕，實體板載綠色 LED 精準響應</td>
+                                        <td><strong>手掌物理遮蔽</strong></td>
+                                        <td>手掌緊密包覆天線，網頁數值明確衰減 15 ~ 25 dBm</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>頻譜分析與推薦</strong></td>
+                                        <td>統計 1/6/11 頻道佔用，精準推薦全場最順暢的 Wi-Fi 頻道</td>
                                     </tr>
                                     <tr>
                                         <td><strong>RESTful API 驗證</strong></td>
-                                        <td>手動輸入 <code>/api/status</code> 能看見 JSON，且首頁每 2 秒自動刷新</td>
+                                        <td>瀏覽器打開 <code>/api/scan</code> 能看見純 JSON，且支援自動輪詢</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>手機或跨桌互控</strong></td>
-                                        <td>能使用手機或連線隔壁同學 Pico IP 進行無線跨設備控制</td>
+                                        <td><strong>全班信號尋寶</strong></td>
+                                        <td>成功透過 RSSI dBm 指標追蹤並鎖定特定目標熱點位置</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1862,8 +1864,8 @@ payload = {
                             <li><strong>提示 EADDRINUSE (Port 80 被佔用)</strong>：
                                 <br>在 Thonny 按下紅色「Stop/Restart」按鈕軟重啟 Pico，或拔插 USB 重新連線即可。
                             </li>
-                            <li><strong>點擊按鈕 LED 沒反應</strong>：
-                                <br>確認 Pico 2 W 主迴圈是否仍在正常運行，查看 Thonny Shell 是否印出 HTTP 請求日誌。
+                            <li><strong>掃描不到熱點</strong>：
+                                <br>確認 Pico 2 W 天線金屬罩未被導電物體碰觸，並確認周遭確實有開啟 2.4GHz Wi-Fi 基地台。
                             </li>
                         </ul>
                     </div>
@@ -1873,12 +1875,113 @@ payload = {
             <!-- 實作模組：邊緣微型 Web Server 程式碼 -->
             <section class="module-section" id="lab2-webserver">
                 <div class="section-header">
-                    <span class="section-icon">🌐</span>
-                    <h2 class="section-title">【實作】Pico 2 W 邊緣微型 Web Server (lab2_web_server.py)</h2>
+                    <span class="section-icon">📡</span>
+                    <h2 class="section-title">【實作】Pico 2 W 邊緣微型 Web Server：Wi-Fi 空間雷達探測儀 (lab2_web_server.py)</h2>
                 </div>
                 <p class="section-desc">
-                    <strong>單檔即跑（All-in-One Standalone）</strong>。內建響應式現代化深色 CSS 儀表板、RESTful API 路由與 AJAX 非同步動態輪詢！
+                    <strong>單檔即跑（All-in-One Standalone）</strong>。內建高科技科幻動態雷達掃描盤、2.4GHz 頻譜擁擠度長條圖、RESTful <code>/api/scan</code> JSON 路由與 AJAX 非同步動態輪詢！
                 </p>
+
+                <!-- 互動式 Wi-Fi 空間雷達模擬器 (免板子隨開即玩) -->
+                <div class="card" style="margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.4); background: radial-gradient(circle at 50% 20%, #064e3b15 0%, #030712 100%);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <h3 style="margin: 0; color: #10b981; display: flex; align-items: center; gap: 8px;">
+                            <span>🛸 虛擬 Wi-Fi 空間雷達互動模擬器 (免板子隨開即玩)</span>
+                            <span class="badge badge-green">Live Simulator</span>
+                        </h3>
+                        <span style="font-size: 0.82rem; color: #94a3b8;">模擬 Pico 2 W 掃描 CYW43439 射頻數據</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: center;">
+                        <!-- 雷達掃描盤 Canvas -->
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="position: relative; width: 280px; height: 280px; border-radius: 50%; border: 2px solid rgba(16, 185, 129, 0.5); box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); overflow: hidden; background: #030712;">
+                                <canvas id="radarCanvas" width="280" height="280" style="display: block; width: 100%; height: 100%;"></canvas>
+                                <div style="position: absolute; top: 8px; left: 12px; font-size: 0.72rem; color: #10b981; font-family: monospace;">RANGE: 30m / -30dBm</div>
+                                <div id="radarPulseIndicator" style="position: absolute; bottom: 8px; right: 12px; font-size: 0.72rem; color: #38bdf8; font-family: monospace;">STATUS: ACTIVE</div>
+                            </div>
+                            <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                                <button class="btn btn-green" onclick="triggerRadarSweep()" style="padding: 6px 14px; font-size: 0.85rem;">📡 立即執行雷達掃描</button>
+                                <button id="btnShielding" class="btn btn-purple" onclick="toggleHandShielding()" style="padding: 6px 14px; font-size: 0.85rem;">✋ 手掌遮蔽 (-20dBm)</button>
+                            </div>
+                        </div>
+
+                        <!-- 頻道頻譜與狀態卡片 -->
+                        <div>
+                            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span style="font-size: 0.85rem; color: #94a3b8;">🎯 最佳 Wi-Fi 連線推薦頻道：</span>
+                                    <span id="bestChannelBadge" class="badge badge-green" style="font-size: 0.9rem; font-weight: bold;">Channel 11 (最順暢)</span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5;">
+                                    微控制器演算法即時運算 2.4GHz 三大互不干擾頻道 (1, 6, 11) 佔用率，自動推薦訊號衝突最低的最佳頻段。
+                                </div>
+                            </div>
+
+                            <!-- 頻道長條圖 -->
+                            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid #1e293b; border-radius: 8px; padding: 14px;">
+                                <div style="font-size: 0.82rem; color: #94a3b8; margin-bottom: 10px;">📊 2.4GHz 頻譜擁塞度分佈 (AP 數量)：</div>
+                                <div style="display: flex; gap: 8px; align-items: flex-end; height: 70px; padding-bottom: 4px; border-bottom: 1px solid #334155;">
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;">
+                                        <div id="barCh1" style="width: 100%; background: #38bdf8; height: 50%; border-radius: 3px 3px 0 0; transition: height 0.4s;"></div>
+                                        <span style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">CH 1</span>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;">
+                                        <div id="barCh6" style="width: 100%; background: #ef4444; height: 85%; border-radius: 3px 3px 0 0; transition: height 0.4s;"></div>
+                                        <span style="font-size: 0.72rem; color: #f87171; margin-top: 4px;">CH 6</span>
+                                    </div>
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;">
+                                        <div id="barCh11" style="width: 100%; background: #10b981; height: 25%; border-radius: 3px 3px 0 0; transition: height 0.4s;"></div>
+                                        <span style="font-size: 0.72rem; color: #34d399; margin-top: 4px;">CH 11</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-top: 6px;">
+                                    <span>CH 1: 2個</span>
+                                    <span style="color: #f87171;">CH 6: 4個 (擁塞)</span>
+                                    <span style="color: #34d399;">CH 11: 1個 (最佳)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模擬雷達 AP 清單表 -->
+                    <div class="data-table-container" style="margin-top: 16px;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>熱點名稱 (SSID)</th>
+                                    <th>頻道</th>
+                                    <th>信號強度 (RSSI)</th>
+                                    <th>品質</th>
+                                    <th>安全加密</th>
+                                </tr>
+                            </thead>
+                            <tbody id="simApTableBody">
+                                <tr>
+                                    <td><strong>Campus_HighSpeed_WiFi</strong></td>
+                                    <td><span class="badge badge-cyan">CH 1</span></td>
+                                    <td id="simRssi0" style="color: #34d399; font-weight: bold;">-45 dBm</td>
+                                    <td><div style="background: #1e293b; border-radius: 4px; overflow: hidden; height: 8px; width: 100px;"><div id="simBar0" style="background: #10b981; height: 100%; width: 90%;"></div></div></td>
+                                    <td><span class="badge badge-purple">WPA2/WPA3</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>IoT_Maker_Lab_2.4G</strong></td>
+                                    <td><span class="badge badge-purple">CH 6</span></td>
+                                    <td id="simRssi1" style="color: #facc15; font-weight: bold;">-58 dBm</td>
+                                    <td><div style="background: #1e293b; border-radius: 4px; overflow: hidden; height: 8px; width: 100px;"><div id="simBar1" style="background: #facc15; height: 100%; width: 75%;"></div></div></td>
+                                    <td><span class="badge badge-purple">WPA2-PSK</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>iPhone_Hotspot 📱</strong></td>
+                                    <td><span class="badge badge-green">CH 11</span></td>
+                                    <td id="simRssi2" style="color: #94a3b8; font-weight: bold;">-72 dBm</td>
+                                    <td><div style="background: #1e293b; border-radius: 4px; overflow: hidden; height: 8px; width: 100px;"><div id="simBar2" style="background: #38bdf8; height: 100%; width: 56%;"></div></div></td>
+                                    <td><span class="badge badge-purple">WPA3-SAE</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- 完整原始碼卡片 -->
                 <div class="code-container" style="margin-bottom: 28px;">
@@ -1888,80 +1991,649 @@ payload = {
                             <button class="copy-button" onclick="copyCode(this, 'code-webserver')">一鍵複製伺服器程式碼</button>
                         </div>
                     </div>
-                    <pre class="code-block" id="code-webserver"><span class="c-com"># lab2_web_server.py - Pico 2 W 邊緣微型 Web Server (Edge Web Server)</span>
-<span class="c-imp">import</span> time
-<span class="c-imp">import</span> network
-<span class="c-imp">import</span> machine
-<span class="c-imp">from</span> machine <span class="c-imp">import</span> Pin, ADC
-<span class="c-imp">import</span> usocket <span class="c-imp">as</span> socket
-<span class="c-imp">import</span> ujson
-<span class="c-imp">import</span> gc
+                    <pre class="code-block" id="code-webserver"># lab2_web_server.py - Pico 2 W 邊緣微型 Web Server：Wi-Fi 空間雷達信號探測儀
+# 適用硬體：Raspberry Pi Pico 2 W (RP2350 + CYW43439)
+# 運作環境：Thonny IDE + MicroPython
+# 零外接零件：使用 CYW43439 板載無線晶片 + RP2350 內部溫度感測器 (ADC 4) + 板載綠色 LED (&quot;LED&quot;)
+# 專案特色：
+#   1. Pico 2 W 自主在 Port 80 架設輕量 HTTP Web Server。
+#   2. 手機或電腦瀏覽器輸入 http://192.168.x.x 開啟高科技科幻雷達儀表板。
+#   3. 點擊「立即掃描」或自動偵測，微控制器深入 CYW43439 底層掃描周遭所有 Wi-Fi 熱點！
+#   4. 視覺化呈現：信號強度 (RSSI/dBm)、頻道佔用分析、最佳頻寬推薦、加密防護檢測。
 
-<span class="c-com"># 1. Wi-Fi 連線設定</span>
-WIFI_SSID = <span class="c-str">"YOUR_WIFI_SSID"</span>          <span class="c-com"># 僅支援 2.4GHz Wi-Fi</span>
-WIFI_PASSWORD = <span class="c-str">"YOUR_WIFI_PASSWORD"</span>
+import time
+import network
+import machine
+from machine import Pin, ADC
+import usocket as socket
+import ujson
+import gc
+import ubinascii
 
-<span class="c-com"># 2. 硬體初始化</span>
-led = Pin(<span class="c-str">"LED"</span>, Pin.OUT)
-temp_sensor = ADC(<span class="c-num">4</span>)
-start_time = time.time()
-request_count = <span class="c-num">0</span>
+# ==========================================
+# 1. Wi-Fi 連線設定 (請填入您的 2.4GHz Wi-Fi)
+# ==========================================
+WIFI_SSID = &quot;YOUR_WIFI_SSID&quot;          # 請填入 Wi-Fi 名稱 (僅支援 2.4GHz)
+WIFI_PASSWORD = &quot;YOUR_WIFI_PASSWORD&quot;  # 請填入 Wi-Fi 密碼
 
-<span class="c-key">def</span> <span class="c-func">read_temperature</span>():
-    reading = temp_sensor.read_u16() * (<span class="c-num">3.3</span> / <span class="c-num">65535</span>)
-    <span class="c-key">return</span> <span class="c-num">27</span> - (reading - <span class="c-num">0.706</span>) / <span class="c-num">0.001721</span>
+# ==========================================
+# 2. 硬體引腳與狀態初始化
+# ==========================================
+led = Pin(&quot;LED&quot;, Pin.OUT)       # 板載綠色 LED (雷達掃描時脈衝閃爍)
+temp_sensor = ADC(4)            # RP2350 內部溫度感測器
+start_time = time.time()        # 開機計時起點
+scan_count = 0                  # 累計雷達掃描次數
 
-<span class="c-key">def</span> <span class="c-func">blink_led</span>(times=<span class="c-num">3</span>, duration=<span class="c-num">0.1</span>):
-    <span class="c-key">for</span> _ <span class="c-key">in</span> range(times):
-        led.on(); time.sleep(duration); led.off(); time.sleep(duration)
+# 建立 Wi-Fi 網路介面
+wlan = network.WLAN(network.STA_IF)
 
-<span class="c-key">def</span> <span class="c-func">connect_wifi</span>():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(<span class="c-key">True</span>)
-    <span class="c-key">if</span> <span class="c-key">not</span> wlan.isconnected():
+# 安全加密模式對應表 (CYW43439)
+AUTH_MODES = {
+    0: &quot;OPEN (開放)&quot;,
+    1: &quot;WEP&quot;,
+    2: &quot;WPA-PSK&quot;,
+    3: &quot;WPA2-PSK&quot;,
+    4: &quot;WPA/WPA2-PSK&quot;,
+    5: &quot;WPA2/WPA3&quot;,
+    6: &quot;WPA3-SAE&quot;
+}
+
+def read_temperature():
+    &quot;&quot;&quot;讀取 RP2350 內部溫度感測器 (攝氏 °C)&quot;&quot;&quot;
+    conversion_factor = 3.3 / 65535
+    reading = temp_sensor.read_u16() * conversion_factor
+    # RP2350 內部溫度物理公式：27 - (Vbe - 0.706) / 0.001721
+    return 27 - (reading - 0.706) / 0.001721
+
+def blink_led(times=2, duration=0.06):
+    &quot;&quot;&quot;板載 LED 脈衝閃爍 (雷達掃描實體反饋)&quot;&quot;&quot;
+    for _ in range(times):
+        led.on()
+        time.sleep(duration)
+        led.off()
+        time.sleep(duration)
+
+def rssi_to_quality(rssi):
+    &quot;&quot;&quot;將 dBm 訊號強度轉換為百分比 (0~100%)&quot;&quot;&quot;
+    if rssi &lt;= -100:
+        return 0
+    elif rssi &gt;= -50:
+        return 100
+    else:
+        return 2 * (rssi + 100)
+
+def connect_wifi():
+    &quot;&quot;&quot;連線至 Wi-Fi 基地台&quot;&quot;&quot;
+    wlan.active(True)
+    if not wlan.isconnected():
+        print(&quot;=&quot; * 65)
+        print(f&quot;📡 [Wi-Fi] 正在連線至: {WIFI_SSID} ...&quot;)
         wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-        timeout = <span class="c-num">25</span>
-        <span class="c-key">while</span> <span class="c-key">not</span> wlan.isconnected() <span class="c-key">and</span> timeout &gt; <span class="c-num">0</span>:
-            time.sleep(<span class="c-num">0.5</span>); timeout -= <span class="c-num">1</span>
-    <span class="c-key">return</span> wlan.ifconfig()[<span class="c-num">0</span>] <span class="c-key">if</span> wlan.isconnected() <span class="c-key">else</span> <span class="c-key">None</span>
+        timeout = 25
+        while not wlan.isconnected() and timeout &gt; 0:
+            time.sleep(0.5)
+            timeout -= 1
+            print(&quot;.&quot;, end=&quot;&quot;)
+            
+    if wlan.isconnected():
+        ip = wlan.ifconfig()[0]
+        print(f&quot;\n✅ [Wi-Fi] 連線成功！Pico 2 W 本機 IP: {ip}&quot;)
+        return ip
+    else:
+        print(&quot;\n❌ [錯誤] Wi-Fi 連線逾時！請確認帳密與 2.4GHz 頻段。&quot;)
+        return None
 
-<span class="c-key">def</span> <span class="c-func">main</span>():
-    <span class="c-key">global</span> request_count
-    ip = connect_wifi()
-    <span class="c-key">if</span> <span class="c-key">not</span> ip: <span class="c-key">return</span>
+def perform_wifi_radar_scan():
+    &quot;&quot;&quot;調用 CYW43439 底層進行 Wi-Fi 空間雷達掃描&quot;&quot;&quot;
+    global scan_count
+    scan_count += 1
     
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, <span class="c-num">1</span>)
-    server_sock.bind((<span class="c-str">"0.0.0.0"</span>, <span class="c-num">80</span>))
-    server_sock.listen(<span class="c-num">5</span>)
-    print(f<span class="c-str">"🎉 Web Server 已啟動！請用瀏覽器開啟： http://{ip}"</span>)
-
-    <span class="c-key">while</span> <span class="c-key">True</span>:
-        client_sock, client_addr = server_sock.accept()
-        raw_req = client_sock.recv(<span class="c-num">1024</span>).decode(<span class="c-str">"utf-8"</span>, <span class="c-str">"ignore"</span>)
-        path = raw_req.split(<span class="c-str">" "</span>)[<span class="c-num">1</span>] <span class="c-key">if</span> <span class="c-str">" "</span> <span class="c-key">in</span> raw_req <span class="c-key">else</span> <span class="c-str">"/"</span>
+    # 物理反饋：板載 LED 快閃兩下表示雷達波射出
+    blink_led(2, 0.06)
+    gc.collect()
+    
+    try:
+        raw_scan = wlan.scan()
+    except Exception as e:
+        print(f&quot;掃描異常: {e}&quot;)
+        raw_scan = []
         
-        <span class="c-key">if</span> path == <span class="c-str">"/api/status"</span>:
-            body = ujson.dumps({<span class="c-str">"temp"</span>: round(read_temperature(), <span class="c-num">2</span>), <span class="c-str">"led"</span>: led.value(), <span class="c-str">"uptime"</span>: time.time() - start_time})
-            client_sock.sendall(f<span class="c-str">"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{body}"</span>.encode(<span class="c-str">"utf-8"</span>))
-        <span class="c-key">elif</span> path.startswith(<span class="c-str">"/api/led"</span>):
-            <span class="c-key">if</span> <span class="c-str">"state=on"</span> <span class="c-key">in</span> path: led.on()
-            <span class="c-key">elif</span> <span class="c-str">"state=off"</span> <span class="c-key">in</span> path: led.off()
-            <span class="c-key">elif</span> <span class="c-str">"state=toggle"</span> <span class="c-key">in</span> path: led.toggle()
-            <span class="c-key">elif</span> <span class="c-str">"state=blink"</span> <span class="c-key">in</span> path: blink_led(<span class="c-num">3</span>, <span class="c-num">0.12</span>)
-            client_sock.sendall(b<span class="c-str">"HTTP/1.1 303 See Other\r\nLocation: /\r\nConnection: close\r\n\r\n"</span>)
-        <span class="c-key">else</span>:
-            <span class="c-com"># 回傳儀表板 HTML (詳見完整 lab2_web_server.py)</span>
-            html = f<span class="c-str">"&lt;h1&gt;Pico 2 W Web Server ({ip})&lt;/h1&gt;&lt;p&gt;Temp: {read_temperature():.2f}&amp;deg;C&lt;/p&gt;&lt;a href='/api/led?state=toggle'&gt;Toggle LED&lt;/a&gt;"</span>
-            client_sock.sendall(f<span class="c-str">"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n{html}"</span>.encode(<span class="c-str">"utf-8"</span>))
-        client_sock.close()
-        gc.collect()
+    ap_list = []
+    channel_counts = {}
+    
+    for item in raw_scan:
+        # 格式: (ssid, bssid, channel, RSSI, authmode, hidden)
+        ssid_raw = item[0]
+        try:
+            ssid_str = ssid_raw.decode(&quot;utf-8&quot;).strip()
+        except:
+            ssid_str = str(ssid_raw)
+            
+        if not ssid_str:
+            ssid_str = &quot;[隱藏 SSID 網路]&quot;
+            
+        bssid_bytes = item[1]
+        bssid_str = &quot;:&quot;.join([f&quot;{b:02X}&quot; for b in bssid_bytes])
+        channel = item[2]
+        rssi = item[3]
+        authmode = item[4]
+        hidden = True if item[5] == 1 else False
+        
+        # 統計頻道佔用
+        channel_counts[channel] = channel_counts.get(channel, 0) + 1
+        
+        ap_list.append({
+            &quot;ssid&quot;: ssid_str,
+            &quot;bssid&quot;: bssid_str,
+            &quot;channel&quot;: channel,
+            &quot;rssi&quot;: rssi,
+            &quot;quality&quot;: rssi_to_quality(rssi),
+            &quot;security&quot;: AUTH_MODES.get(authmode, f&quot;Mode {authmode}&quot;),
+            &quot;hidden&quot;: hidden
+        })
+        
+    # 依照訊號強度由強到弱排序
+    ap_list.sort(key=lambda x: x[&quot;rssi&quot;], reverse=True)
+    
+    # 評估 2.4GHz 三大互不干擾頻道 (1, 6, 11) 的壅塞度，推薦最佳頻道
+    main_channels = [1, 6, 11]
+    best_channel = min(main_channels, key=lambda c: channel_counts.get(c, 0))
+    
+    gc.collect()
+    return {
+        &quot;aps&quot;: ap_list,
+        &quot;total_count&quot;: len(ap_list),
+        &quot;scan_count&quot;: scan_count,
+        &quot;best_channel&quot;: best_channel,
+        &quot;channel_stats&quot;: channel_counts,
+        &quot;temp&quot;: round(read_temperature(), 2),
+        &quot;uptime&quot;: time.time() - start_time,
+        &quot;mem_free&quot;: gc.mem_free()
+    }
 
-<span class="c-key">if</span> __name__ == <span class="c-str">"__main__"</span>:
-    main()</pre>
+def build_dashboard_html(ip):
+    &quot;&quot;&quot;產生高科技科幻風格的 Wi-Fi 空間雷達儀表板&quot;&quot;&quot;
+    html = f&quot;&quot;&quot;&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;zh-TW&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;Pico 2 W - Wi-Fi 空間雷達探測儀&lt;/title&gt;
+    &lt;style&gt;
+        :root {{
+            --bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.85);
+            --card-border: rgba(31, 41, 55, 0.8);
+            --radar-green: #10b981;
+            --radar-cyan: #38bdf8;
+            --radar-glow: rgba(16, 185, 129, 0.25);
+            --text-main: #f9fafb;
+            --text-sub: #9ca3af;
+        }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, monospace; }}
+        body {{
+            background: radial-gradient(circle at 50% 20%, #111827 0%, var(--bg) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .header {{
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 24px;
+        }}
+        .radar-badge {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--radar-green);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 9999px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            box-shadow: 0 0 15px var(--radar-glow);
+        }}
+        .pulse-dot {{
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--radar-green);
+            box-shadow: 0 0 8px var(--radar-green);
+            animation: pulse 1.5s infinite;
+        }}
+        @keyframes pulse {{
+            0%, 100% {{ opacity: 1; transform: scale(1); }}
+            50% {{ opacity: 0.4; transform: scale(0.8); }}
+        }}
+        h1 {{ font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px; }}
+        .subtitle {{ font-size: 0.85rem; color: var(--text-sub); }}
+
+        /* 雷達掃描盤 */
+        .radar-box {{
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            margin: 0 auto 24px auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, rgba(3, 7, 18, 0.9) 70%);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.15), inset 0 0 20px rgba(16, 185, 129, 0.1);
+            overflow: hidden;
+        }}
+        .radar-grid-circle {{
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px dashed rgba(16, 185, 129, 0.25);
+        }}
+        .radar-axis-h {{
+            position: absolute; top: 50%; left: 0; right: 0;
+            height: 1px; background: rgba(16, 185, 129, 0.25);
+        }}
+        .radar-axis-v {{
+            position: absolute; left: 50%; top: 0; bottom: 0;
+            width: 1px; background: rgba(16, 185, 129, 0.25);
+        }}
+        .radar-sweep {{
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.4) 0deg, transparent 60deg);
+            animation: sweep 3s linear infinite;
+        }}
+        @keyframes sweep {{
+            from {{ transform: rotate(0deg); }}
+            to {{ transform: rotate(360deg); }}
+        }}
+
+        /* 操作控制區 */
+        .controls-card {{
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }}
+        .btn-scan {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #022c22;
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }}
+        .btn-scan:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+        }}
+        .btn-scan:disabled {{
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }}
+
+        /* 統計資訊條 */
+        .meta-stats {{
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }}
+        .meta-val {{ font-weight: 700; color: var(--radar-cyan); }}
+
+        /* 頻道推薦卡 */
+        .channel-tip-box {{
+            max-width: 600px;
+            width: 100%;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }}
+        .best-chan-badge {{
+            background: #0284c7;
+            color: #f0f9ff;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 6px;
+        }}
+
+        /* 熱點信號清單 */
+        .ap-list-container {{
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }}
+        .ap-card {{
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 16px;
+            transition: all 0.2s;
+        }}
+        .ap-card:hover {{
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }}
+        .ap-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }}
+        .ap-ssid {{
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }}
+        .ap-meta {{
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }}
+        .tag {{
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.72rem;
+        }}
+        .tag-chan {{ background: #1e293b; color: #94a3b8; border: 1px solid #334155; }}
+        .tag-sec {{ background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }}
+        
+        /* 訊號強弱進度條 */
+        .signal-bar-box {{
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }}
+        .signal-track {{
+            flex: 1;
+            height: 8px;
+            background: #1f2937;
+            border-radius: 9999px;
+            overflow: hidden;
+        }}
+        .signal-fill {{
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }}
+        .rssi-val {{
+            font-weight: 800;
+            font-size: 0.85rem;
+            width: 75px;
+            text-align: right;
+        }}
+        .status-good {{ color: #34d399; background: #10b981; }}
+        .status-fair {{ color: #38bdf8; background: #0284c7; }}
+        .status-weak {{ color: #fbbf24; background: #f59e0b; }}
+        .status-bad {{ color: #f87171; background: #ef4444; }}
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;header&quot;&gt;
+        &lt;div class=&quot;radar-badge&quot;&gt;
+            &lt;span class=&quot;pulse-dot&quot;&gt;&lt;/span&gt;
+            CYW43439 邊緣無線射頻雷達
+        &lt;/div&gt;
+        &lt;h1&gt;Pico 2 W 空間信號探測儀&lt;/h1&gt;
+        &lt;div class=&quot;subtitle&quot;&gt;區網 IP: &lt;strong&gt;{ip}&lt;/strong&gt; | Port 80 邊緣伺服器&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 動態雷達掃描盤 --&gt;
+    &lt;div class=&quot;radar-box&quot;&gt;
+        &lt;div class=&quot;radar-sweep&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;radar-grid-circle&quot; style=&quot;width: 50px; height: 50px;&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;radar-grid-circle&quot; style=&quot;width: 110px; height: 110px;&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;radar-grid-circle&quot; style=&quot;width: 170px; height: 170px;&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;radar-axis-h&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;radar-axis-v&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 控制面板 --&gt;
+    &lt;div class=&quot;controls-card&quot;&gt;
+        &lt;button class=&quot;btn-scan&quot; id=&quot;scanBtn&quot; onclick=&quot;triggerScan()&quot;&gt;
+            &lt;span&gt;📡 啟動空間雷達掃描&lt;/span&gt;
+        &lt;/button&gt;
+        &lt;div class=&quot;meta-stats&quot;&gt;
+            &lt;div&gt;熱點總數: &lt;span class=&quot;meta-val&quot; id=&quot;totalAps&quot;&gt;0&lt;/span&gt; 個&lt;/div&gt;
+            &lt;div&gt;晶片溫度: &lt;span class=&quot;meta-val&quot; id=&quot;chipTemp&quot;&gt;--&lt;/span&gt; °C&lt;/div&gt;
+            &lt;div&gt;可用記憶體: &lt;span class=&quot;meta-val&quot; id=&quot;memFree&quot;&gt;--&lt;/span&gt; KB&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 最佳頻道推薦 --&gt;
+    &lt;div class=&quot;channel-tip-box&quot; id=&quot;channelTip&quot; style=&quot;display: none;&quot;&gt;
+        &lt;span&gt;🌟 &lt;strong&gt;2.4GHz 最佳推薦頻道&lt;/strong&gt;（最不擁擠）：&lt;/span&gt;
+        &lt;span class=&quot;best-chan-badge&quot; id=&quot;bestChanText&quot;&gt;CH 11&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;!-- 探測到的熱點清單 --&gt;
+    &lt;div class=&quot;ap-list-container&quot; id=&quot;apList&quot;&gt;
+        &lt;div style=&quot;text-align: center; padding: 40px 0; color: #64748b;&quot;&gt;
+            請點擊上方「啟動空間雷達掃描」按鈕，探測空氣中的無線電信號...
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        function getSignalClass(rssi) {{
+            if (rssi &gt;= -65) return &#x27;status-good&#x27;;
+            if (rssi &gt;= -75) return &#x27;status-fair&#x27;;
+            if (rssi &gt;= -85) return &#x27;status-weak&#x27;;
+            return &#x27;status-bad&#x27;;
+        }}
+
+        function triggerScan() {{
+            const btn = document.getElementById(&#x27;scanBtn&#x27;);
+            btn.disabled = true;
+            btn.innerHTML = &#x27;&lt;span&gt;⏳ 雷達射束掃描中...&lt;/span&gt;&#x27;;
+            
+            fetch(&#x27;/api/scan&#x27;)
+                .then(r =&gt; r.json())
+                .then(data =&gt; {{
+                    document.getElementById(&#x27;totalAps&#x27;).innerText = data.total_count;
+                    document.getElementById(&#x27;chipTemp&#x27;).innerText = data.temp;
+                    document.getElementById(&#x27;memFree&#x27;).innerText = Math.round(data.mem_free / 1024);
+                    
+                    // 顯示推薦頻道
+                    document.getElementById(&#x27;channelTip&#x27;).style.display = &#x27;flex&#x27;;
+                    document.getElementById(&#x27;bestChanText&#x27;).innerText = &#x27;頻道 &#x27; + data.best_channel;
+
+                    const listContainer = document.getElementById(&#x27;apList&#x27;);
+                    if (data.aps.length === 0) {{
+                        listContainer.innerHTML = &#x27;&lt;div style=&quot;text-align: center; padding: 30px; color: #64748b;&quot;&gt;周遭未探測到任何公開 Wi-Fi 訊號&lt;/div&gt;&#x27;;
+                    }} else {{
+                        let html = &#x27;&#x27;;
+                        data.aps.forEach(ap =&gt; {{
+                            const cls = getSignalClass(ap.rssi);
+                            html += `
+                                &lt;div class=&quot;ap-card&quot;&gt;
+                                    &lt;div class=&quot;ap-header&quot;&gt;
+                                        &lt;div class=&quot;ap-ssid&quot;&gt;
+                                            📶 ${{ap.ssid}}
+                                        &lt;/div&gt;
+                                        &lt;div class=&quot;ap-meta&quot;&gt;
+                                            &lt;span class=&quot;tag tag-chan&quot;&gt;CH ${{ap.channel}}&lt;/span&gt;
+                                            &lt;span class=&quot;tag tag-sec&quot;&gt;${{ap.security}}&lt;/span&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                    &lt;div style=&quot;font-size: 0.72rem; color: #6b7280; margin-bottom: 6px;&quot;&gt;
+                                        MAC: ${{ap.bssid}}
+                                    &lt;/div&gt;
+                                    &lt;div class=&quot;signal-bar-box&quot;&gt;
+                                        &lt;div class=&quot;signal-track&quot;&gt;
+                                            &lt;div class=&quot;signal-fill ${{cls}}&quot; style=&quot;width: ${{ap.quality}}%;&quot;&gt;&lt;/div&gt;
+                                        &lt;/div&gt;
+                                        &lt;div class=&quot;rssi-val ${{cls}}&quot;&gt;${{ap.rssi}} dBm (${{ap.quality}}%)&lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            `;
+                        }});
+                        listContainer.innerHTML = html;
+                    }}
+                }})
+                .catch(err =&gt; {{
+                    alert(&#x27;掃描失敗或連線逾時: &#x27; + err);
+                }})
+                .finally(() =&gt; {{
+                    btn.disabled = false;
+                    btn.innerHTML = &#x27;&lt;span&gt;📡 啟動空間雷達掃描&lt;/span&gt;&#x27;;
+                }});
+        }}
+
+        // 初次載入自動觸發一次雷達掃描
+        window.onload = () =&gt; {{
+            setTimeout(triggerScan, 800);
+        }};
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;&quot;&quot;&quot;
+    return html
+
+def parse_http_request(raw_request):
+    &quot;&quot;&quot;解析 HTTP 請求方法與路由路徑&quot;&quot;&quot;
+    try:
+        lines = raw_request.split(&quot;\r\n&quot;)
+        if not lines or not lines[0]:
+            return &quot;GET&quot;, &quot;/&quot;
+        parts = lines[0].split(&quot; &quot;)
+        return parts[0], parts[1] if len(parts) &gt; 1 else &quot;/&quot;
+    except:
+        return &quot;GET&quot;, &quot;/&quot;
+
+def main():
+    print(&quot;\n&quot; + &quot;=&quot; * 65)
+    print(&quot;📡 方案 10：Pico 2 W 空間 Wi-Fi 雷達信號探測儀 (Web Server)&quot;)
+    print(&quot;=&quot; * 65)
+    
+    ip = connect_wifi()
+    if not ip:
+        return
+        
+    # 建立 TCP Socket 伺服器並綁定 Port 80
+    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_sock.bind((&quot;0.0.0.0&quot;, 80))
+    server_sock.listen(5)
+    
+    print(&quot;\n&quot; + &quot;╔&quot; + &quot;═&quot; * 63 + &quot;╗&quot;)
+    print(&quot;║ 🛸 【Wi-Fi 空間雷達 Web 伺服器已就緒！】&quot;)
+    print(&quot;╠&quot; + &quot;═&quot; * 63 + &quot;╣&quot;)
+    print(f&quot;║ 🔗 請用電腦或手機開啟雷達儀表板：&quot;)
+    print(f&quot;║    http://{ip}&quot;)
+    print(&quot;║&quot;)
+    print(&quot;║ 💡 玩法亮點：&quot;)
+    print(&quot;║    1. 點擊「啟動空間雷達掃描」，板載 LED 脈衝閃爍！&quot;)
+    print(&quot;║    2. 網頁即時解析周遭 Wi-Fi 信號 (dBm) 與最佳推薦頻道。&quot;)
+    print(&quot;║    3. 手指捏緊 RP2350 晶片，親眼觀察晶片溫度與射頻熱度！&quot;)
+    print(&quot;╚&quot; + &quot;═&quot; * 63 + &quot;╝\n&quot;)
+    print(&quot;⏳ 伺服器監聽中 (等待 HTTP Request 連線)...\n&quot;)
+    
+    try:
+        while True:
+            client_sock, client_addr = server_sock.accept()
+            client_ip = client_addr[0]
+            
+            raw_req = client_sock.recv(1024).decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+            method, path = parse_http_request(raw_req)
+            
+            print(f&quot;📥 [HTTP 請求] 來源: {client_ip} | {method} {path}&quot;)
+            
+            # 路由 1：RESTful API 空間雷達掃描端點 (/api/scan)
+            if path == &quot;/api/scan&quot;:
+                scan_data = perform_wifi_radar_scan()
+                body = ujson.dumps(scan_data)
+                resp = (
+                    &quot;HTTP/1.1 200 OK\r\n&quot;
+                    &quot;Content-Type: application/json; charset=utf-8\r\n&quot;
+                    &quot;Access-Control-Allow-Origin: *\r\n&quot;
+                    f&quot;Content-Length: {len(body.encode(&#x27;utf-8&#x27;))}\r\n&quot;
+                    &quot;Connection: close\r\n\r\n&quot;
+                    f&quot;{body}&quot;
+                )
+                client_sock.sendall(resp.encode(&quot;utf-8&quot;))
+                
+            # 路由 2：快速狀態端點 (/api/status)
+            elif path == &quot;/api/status&quot;:
+                status_data = {
+                    &quot;temp&quot;: round(read_temperature(), 2),
+                    &quot;uptime&quot;: time.time() - start_time,
+                    &quot;mem_free&quot;: gc.mem_free()
+                }
+                body = ujson.dumps(status_data)
+                resp = (
+                    &quot;HTTP/1.1 200 OK\r\n&quot;
+                    &quot;Content-Type: application/json; charset=utf-8\r\n&quot;
+                    f&quot;Content-Length: {len(body)}\r\n&quot;
+                    &quot;Connection: close\r\n\r\n&quot;
+                    f&quot;{body}&quot;
+                )
+                client_sock.sendall(resp.encode(&quot;utf-8&quot;))
+                
+            # 路由 3：根目錄首頁儀表板 (/)
+            else:
+                html_page = build_dashboard_html(ip)
+                body_bytes = html_page.encode(&quot;utf-8&quot;)
+                resp = (
+                    &quot;HTTP/1.1 200 OK\r\n&quot;
+                    &quot;Content-Type: text/html; charset=utf-8\r\n&quot;
+                    f&quot;Content-Length: {len(body_bytes)}\r\n&quot;
+                    &quot;Connection: close\r\n\r\n&quot;
+                )
+                client_sock.sendall(resp.encode(&quot;utf-8&quot;) + body_bytes)
+                
+            client_sock.close()
+            gc.collect()
+            
+    except KeyboardInterrupt:
+        print(&quot;\n🛑 使用者手動中斷伺服器。&quot;)
+    except Exception as e:
+        print(f&quot;\n❌ 伺服器異常: {e}&quot;)
+    finally:
+        try:
+            server_sock.close()
+            print(&quot;Web Server 已正常關閉。&quot;)
+        except:
+            pass
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre>
                 </div>
             </section>
-
             <!-- 理論篇：政府開放資料與 RESTful API 深度剖析 -->
             <section class="module-section" id="opendata-theory">
                 <div class="section-header">
@@ -2614,6 +3286,160 @@ API_URL = f<span class="c-str">"https://opendata.cwa.gov.tw/api/v1/rest/datastor
                 statusEl.style.color = '#f87171';
             }
         }
+
+        // 互動工具 3：Wi-Fi 空間雷達模擬器 (Canvas 動畫與物理遮蔽模擬)
+        let radarAngle = 0;
+        let isShielded = false;
+        const simulatedAps = [
+            { ssid: "Campus_HighSpeed_WiFi", ch: 1, baseRssi: -45, dist: 0.35, angle: 0.8 },
+            { ssid: "IoT_Maker_Lab_2.4G", ch: 6, baseRssi: -58, dist: 0.55, angle: 2.3 },
+            { ssid: "iPhone_Hotspot 📱", ch: 11, baseRssi: -72, dist: 0.75, angle: 4.1 },
+            { ssid: "Staff_Office_Guest", ch: 6, baseRssi: -82, dist: 0.88, angle: 5.4 }
+        ];
+
+        function initRadarCanvas() {
+            const canvas = document.getElementById('radarCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const maxR = cx - 10;
+
+            function draw() {
+                ctx.fillStyle = '#030712';
+                ctx.fillRect(0, 0, w, h);
+
+                // 同心圓
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+                ctx.lineWidth = 1;
+                for (let r of [0.33, 0.66, 1.0]) {
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, maxR * r, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // 十字線
+                ctx.beginPath();
+                ctx.moveTo(cx, 10);
+                ctx.lineTo(cx, h - 10);
+                ctx.moveTo(10, cy);
+                ctx.lineTo(w - 10, cy);
+                ctx.stroke();
+
+                // 旋轉掃描光束
+                const gradient = ctx.createConicGradient(radarAngle, cx, cy);
+                gradient.addColorStop(0, 'rgba(16, 185, 129, 0)');
+                gradient.addColorStop(0.85, 'rgba(16, 185, 129, 0.05)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0.4)');
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, maxR, radarAngle - Math.PI / 4, radarAngle);
+                ctx.closePath();
+                ctx.fill();
+
+                // 掃描線
+                ctx.strokeStyle = '#34d399';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + maxR * Math.cos(radarAngle), cy + maxR * Math.sin(radarAngle));
+                ctx.stroke();
+
+                // 繪製 Wi-Fi AP 訊號點
+                simulatedAps.forEach((ap) => {
+                    const drop = isShielded ? 20 : 0;
+                    const rssi = ap.baseRssi - drop;
+                    const r = maxR * ap.dist;
+                    const x = cx + r * Math.cos(ap.angle);
+                    const y = cy + r * Math.sin(ap.angle);
+
+                    // 亮點光暈
+                    ctx.fillStyle = isShielded ? '#f87171' : '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 文字標籤
+                    ctx.font = '9px monospace';
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.fillText(`${rssi}dBm`, x + 6, y - 2);
+                });
+
+                radarAngle += 0.035;
+                if (radarAngle > Math.PI * 2) radarAngle = 0;
+                requestAnimationFrame(draw);
+            }
+            requestAnimationFrame(draw);
+        }
+
+        function triggerRadarSweep() {
+            const ind = document.getElementById('radarPulseIndicator');
+            if (ind) {
+                ind.innerText = 'PULSE: SCANNING...';
+                ind.style.color = '#10b981';
+                setTimeout(() => {
+                    ind.innerText = 'STATUS: ACTIVE';
+                    ind.style.color = '#38bdf8';
+                }, 1000);
+            }
+            updateSimTable();
+        }
+
+        function toggleHandShielding() {
+            isShielded = !isShielded;
+            const btn = document.getElementById('btnShielding');
+            if (btn) {
+                if (isShielded) {
+                    btn.innerText = '✋ 手掌已包覆天線 (衰減中 -20dBm)';
+                    btn.style.background = '#ef4444';
+                    btn.style.borderColor = '#dc2626';
+                } else {
+                    btn.innerText = '✋ 手掌遮蔽 (-20dBm)';
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                }
+            }
+            updateSimTable();
+        }
+
+        function updateSimTable() {
+            const drop = isShielded ? 20 : 0;
+            const rssi0 = -45 - drop;
+            const rssi1 = -58 - drop;
+            const rssi2 = -72 - drop;
+
+            const el0 = document.getElementById('simRssi0');
+            const el1 = document.getElementById('simRssi1');
+            const el2 = document.getElementById('simRssi2');
+            const bar0 = document.getElementById('simBar0');
+            const bar1 = document.getElementById('simBar1');
+            const bar2 = document.getElementById('simBar2');
+
+            if (el0) {
+                el0.innerText = `${rssi0} dBm`;
+                el0.style.color = isShielded ? '#f87171' : '#34d399';
+                bar0.style.width = `${Math.max(10, 2 * (rssi0 + 100))}%`;
+                bar0.style.background = isShielded ? '#f87171' : '#10b981';
+            }
+            if (el1) {
+                el1.innerText = `${rssi1} dBm`;
+                el1.style.color = isShielded ? '#f87171' : '#facc15';
+                bar1.style.width = `${Math.max(10, 2 * (rssi1 + 100))}%`;
+            }
+            if (el2) {
+                el2.innerText = `${rssi2} dBm`;
+                bar2.style.width = `${Math.max(10, 2 * (rssi2 + 100))}%`;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            initRadarCanvas();
+        });
+
     </script>
 </body>
 </html>
